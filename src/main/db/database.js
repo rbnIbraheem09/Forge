@@ -10,26 +10,24 @@ function getDatabase() {
 
   const userDataPath = app.getPath('userData')
   const dbPath = path.join(userDataPath, 'forge.db')
-
   db = new Database(dbPath)
 
-  // Enable WAL mode for better performance
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
 
-  // Run schema
-  const schemaPath = path.join(__dirname, 'schema.sql')
-  const schema = fs.readFileSync(schemaPath, 'utf8')
+  const version = db.pragma('user_version', { simple: true })
 
-  // Execute each statement individually
-  const statements = schema
-    .split(';')
-    .map(s => s.trim())
-    .filter(s => s.length > 0)
-
-  for (const statement of statements) {
-    db.prepare(statement).run()
+  if (version === 0) {
+    // Fresh install or pre-session-2 DB — drop old tables and apply full schema
+    db.exec(`
+      DROP TABLE IF EXISTS generation_loras;
+      DROP TABLE IF EXISTS generations;
+    `)
   }
+
+  const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8')
+  db.exec(schema)
+  db.pragma('user_version = 2')
 
   return db
 }
