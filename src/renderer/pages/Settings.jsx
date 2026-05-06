@@ -56,12 +56,16 @@ export default function Settings() {
   const handleBrowse = useCallback(async (key) => {
     const path = await window.forge.settings.openFolderPicker()
     if (!path) return
-    await window.forge.settings.set(key, path)
-    setFolders(prev => ({ ...prev, [key]: path }))
-    if (key === 'output_folder') window.forge.scanner.restart()
-    if (key === 'loras_folder') { const r = await window.forge.loras.scan(); showToast(`LoRAs scanned: +${r.added} new.`) }
-    if (key === 'checkpoints_folder') { const r = await window.forge.models.scan(); showToast(`Checkpoints scanned: +${r.added} new.`) }
-    showToast('Folder saved.')
+    try {
+      await window.forge.settings.set(key, path)
+      setFolders(prev => ({ ...prev, [key]: path }))
+      if (key === 'output_folder') window.forge.scanner.restart()
+      if (key === 'loras_folder') { const r = await window.forge.loras.scan(); showToast(`LoRAs scanned: +${r.added} new, ${r.offlined} offline.`); return }
+      if (key === 'checkpoints_folder') { const r = await window.forge.models.scan(); showToast(`Checkpoints scanned: +${r.added} new, ${r.offlined} offline.`); return }
+      showToast('Folder saved.')
+    } catch (err) {
+      showToast('Error saving folder.')
+    }
   }, [showToast])
 
   const handleClear = useCallback(async (key) => {
@@ -72,16 +76,26 @@ export default function Settings() {
 
   const rescanLoras = async () => {
     setScanning(s => ({ ...s, loras: true }))
-    const r = await window.forge.loras.scan()
-    setScanning(s => ({ ...s, loras: false }))
-    showToast(`LoRAs: +${r.added} new, ${r.offlined} offline.`)
+    try {
+      const r = await window.forge.loras.scan()
+      showToast(`LoRAs: +${r.added} new, ${r.offlined} offline.`)
+    } catch {
+      showToast('LoRA scan failed.')
+    } finally {
+      setScanning(s => ({ ...s, loras: false }))
+    }
   }
 
   const rescanCheckpoints = async () => {
     setScanning(s => ({ ...s, checkpoints: true }))
-    const r = await window.forge.models.scan()
-    setScanning(s => ({ ...s, checkpoints: false }))
-    showToast(`Checkpoints: +${r.added} new, ${r.offlined} offline.`)
+    try {
+      const r = await window.forge.models.scan()
+      showToast(`Checkpoints: +${r.added} new, ${r.offlined} offline.`)
+    } catch {
+      showToast('Checkpoint scan failed.')
+    } finally {
+      setScanning(s => ({ ...s, checkpoints: false }))
+    }
   }
 
   const setGalleryDefault = async (size) => {
