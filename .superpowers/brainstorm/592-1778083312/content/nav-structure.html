@@ -1,0 +1,113 @@
+<h2>Section 1 — App Structure & Navigation</h2>
+<p class="subtitle">The new sidebar and how screens connect to each other</p>
+
+<div class="split">
+
+  <div class="mockup">
+    <div class="mockup-header">Sidebar (revised)</div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="background:#141415;width:200px;height:380px;border-radius:8px;padding:16px;display:flex;flex-direction:column;font-size:11px;">
+        <div style="margin-bottom:16px;">
+          <div style="color:#f0f0f0;font-weight:600;font-size:13px;">Forge</div>
+          <div style="color:#555;font-size:9px;">Generation Manager</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+          <div style="background:#7c6ff7;border-radius:6px;padding:7px 10px;color:#fff;display:flex;align-items:center;gap:8px;">
+            <span>🏠</span><span>Dashboard</span>
+          </div>
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;"><span>📥</span><span>Inbox</span></div>
+            <div style="background:#c0392b;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;">7</div>
+          </div>
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;"><span>🗂</span><span>Main Gens</span></div>
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;"><span>🎛</span><span>LoRAs</span></div>
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;"><span>🧱</span><span>Checkpoints</span></div>
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;"><span>📝</span><span>Extras</span></div>
+        </div>
+        <div style="border-top:1px solid #2a2a2e;padding-top:8px;margin-top:8px;">
+          <div style="padding:7px 10px;color:#888;display:flex;align-items:center;gap:8px;"><span>⚙️</span><span>Settings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Screen Flow</div>
+    <div class="mockup-body" style="font-size:10px;color:#aaa;line-height:1.9;">
+      <div style="margin-bottom:12px;">
+        <div style="color:#7c6ff7;font-weight:600;margin-bottom:4px;">📥 Inbox</div>
+        <div style="padding-left:12px;border-left:2px solid #2a2a2e;">
+          New images detected from output folder<br/>
+          Multi-select → assign to Main Gen or create new<br/>
+          Badge count on sidebar icon
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="color:#7c6ff7;font-weight:600;margin-bottom:4px;">🗂 Main Gens list</div>
+        <div style="padding-left:12px;border-left:2px solid #2a2a2e;">
+          Grid of cards (hero image or hex color)<br/>
+          Click → Main Gen detail page<br/>
+          &nbsp;&nbsp;↳ Gallery of iterations (S/M/L toggle)<br/>
+          &nbsp;&nbsp;↳ Click iteration → metadata panel<br/>
+          &nbsp;&nbsp;↳ Select 2 → compare overlay
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="color:#7c6ff7;font-weight:600;margin-bottom:4px;">🎛 LoRAs / 🧱 Checkpoints</div>
+        <div style="padding-left:12px;border-left:2px solid #2a2a2e;">
+          List of your models<br/>
+          Click → detail page (notes + usage gallery)
+        </div>
+      </div>
+      <div>
+        <div style="color:#7c6ff7;font-weight:600;margin-bottom:4px;">⌘K Global Search</div>
+        <div style="padding-left:12px;border-left:2px solid #2a2a2e;">
+          Search Main Gens, Iterations, LoRAs, Checkpoints<br/>
+          Filter chips: type, tags, starred, date range
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Database Schema Changes</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:10px;">
+    <div style="background:#1c1c1e;border-radius:8px;padding:12px;border:1px solid #2a2a2e;">
+      <div style="color:#7c6ff7;margin-bottom:6px;font-weight:600;">New / Replaced Tables</div>
+      <div style="color:#aaa;line-height:1.8;">
+        <span style="color:#f0f0f0;">main_gens</span> — replaces generations<br/>
+        <span style="color:#555;font-size:9px;">title, hero_image_path, hero_color, pinned, notes, tags</span><br/>
+        <span style="color:#f0f0f0;">iterations</span> — children of main_gen<br/>
+        <span style="color:#555;font-size:9px;">main_gen_id, iteration_number, image_path, all metadata, starred, notes, tags</span><br/>
+        <span style="color:#f0f0f0;">iteration_loras</span> — replaces generation_loras<br/>
+        <span style="color:#555;font-size:9px;">iteration_id, lora_id, weight</span><br/>
+        <span style="color:#f0f0f0;">iteration_custom_fields</span> — new<br/>
+        <span style="color:#555;font-size:9px;">iteration_id, field_key, field_value</span><br/>
+        <span style="color:#f0f0f0;">global_field_templates</span> — new<br/>
+        <span style="color:#555;font-size:9px;">field_key (pinned global custom fields)</span><br/>
+        <span style="color:#f0f0f0;">inbox_items</span> — new<br/>
+        <span style="color:#555;font-size:9px;">image_path, extracted_metadata JSON, detected_at</span>
+      </div>
+    </div>
+    <div style="background:#1c1c1e;border-radius:8px;padding:12px;border:1px solid #2a2a2e;">
+      <div style="color:#7c6ff7;margin-bottom:6px;font-weight:600;">Unchanged Tables</div>
+      <div style="color:#aaa;line-height:1.8;">
+        <span style="color:#f0f0f0;">models</span> — checkpoints (as-is)<br/>
+        <span style="color:#f0f0f0;">loras</span> — LoRA models (as-is)<br/>
+        <span style="color:#f0f0f0;">extras</span> — free-form notes (as-is)<br/>
+        <span style="color:#f0f0f0;">settings</span> — folder paths (as-is)
+      </div>
+      <div style="color:#7c6ff7;margin-top:12px;margin-bottom:6px;font-weight:600;">Auto-scan</div>
+      <div style="color:#aaa;line-height:1.8;">
+        <span style="color:#f0f0f0;">chokidar</span> watches output folder<br/>
+        New PNG → extract ComfyUI workflow<br/>
+        from PNG metadata chunk → inbox_items<br/>
+        IPC event pushes badge update to UI
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Does this structure and schema look right? Any nav items to add/remove?</p>

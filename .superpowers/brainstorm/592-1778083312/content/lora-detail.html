@@ -1,0 +1,113 @@
+<h2>Section 4 — LoRA & Checkpoint Detail Pages</h2>
+<p class="subtitle">Same structure for both — stats, notes, then a gallery of every iteration that used it</p>
+
+<div class="mockup" style="margin-bottom:20px;">
+  <div class="mockup-header">LoRAs list — browsing your LoRA library</div>
+  <div class="mockup-body" style="background:#0e0e0f;padding:14px;border-radius:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="color:#f0f0f0;font-size:12px;font-weight:600;">LoRAs</div>
+      <div style="display:flex;gap:6px;">
+        <input style="background:#1c1c1e;border:1px solid #2a2a2e;border-radius:6px;padding:4px 10px;font-size:10px;color:#888;outline:none;" placeholder="Search LoRAs…"/>
+        <div style="background:#7c6ff7;border-radius:6px;padding:4px 10px;font-size:10px;color:#fff;">+ Add LoRA</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:12px;border:1px solid #7c6ff7;cursor:pointer;">
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:600;">detail_tweaker_xl</div>
+          <div style="color:#555;font-size:9px;">Used in 24 iterations · Default weight 0.8</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:2px 8px;font-size:9px;color:#7c6ff7;">24 uses</div>
+        <div style="color:#555;font-size:10px;">→</div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:12px;border:1px solid #2a2a2e;cursor:pointer;">
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:600;">skin_realism_v2</div>
+          <div style="color:#555;font-size:9px;">Used in 15 iterations · Default weight 0.5</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:2px 8px;font-size:9px;color:#888;">15 uses</div>
+        <div style="color:#555;font-size:10px;">→</div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:12px;border:1px solid #2a2a2e;cursor:pointer;">
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:600;">anime_style_bold</div>
+          <div style="color:#555;font-size:9px;">Used in 9 iterations · Default weight 1.0</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:2px 8px;font-size:9px;color:#888;">9 uses</div>
+        <div style="color:#555;font-size:10px;">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">LoRA detail — "detail_tweaker_xl"</div>
+  <div class="mockup-body" style="background:#0e0e0f;padding:14px;border-radius:8px;">
+
+    <!-- Header stats -->
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <div style="flex:1;background:#1c1c1e;border-radius:8px;padding:12px;border:1px solid #2a2a2e;">
+        <div style="color:#f0f0f0;font-size:13px;font-weight:600;margin-bottom:2px;">detail_tweaker_xl</div>
+        <div style="color:#555;font-size:9px;margin-bottom:10px;">/models/loras/detail_tweaker_xl.safetensors</div>
+        <div style="display:flex;gap:12px;">
+          <div style="text-align:center;">
+            <div style="color:#7c6ff7;font-size:16px;font-weight:700;">24</div>
+            <div style="color:#555;font-size:8px;">iterations</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#7c6ff7;font-size:16px;font-weight:700;">0.8</div>
+            <div style="color:#555;font-size:8px;">default wt</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#7c6ff7;font-size:16px;font-weight:700;">0.6</div>
+            <div style="color:#555;font-size:8px;">avg wt used</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#7c6ff7;font-size:16px;font-weight:700;">8</div>
+            <div style="color:#555;font-size:8px;">main gens</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div style="color:#555;text-transform:uppercase;letter-spacing:0.8px;font-size:8px;margin-bottom:5px;">Notes</div>
+    <div style="background:#1c1c1e;border-radius:6px;padding:10px;margin-bottom:14px;border:1px solid #2a2a2e;color:#aaa;font-size:10px;line-height:1.6;">
+      Best used between 0.5–0.8. Above 0.9 it oversharps skin. Pairs well with skin_realism_v2. Don't use with anime styles — clashes badly.
+    </div>
+
+    <!-- Usage gallery -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="color:#555;text-transform:uppercase;letter-spacing:0.8px;font-size:8px;">Used in — 24 iterations</div>
+      <div style="display:flex;gap:4px;">
+        <div style="background:#2a2a2e;border-radius:4px;padding:2px 6px;font-size:8px;color:#888;">All weights</div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:2px 6px;font-size:8px;color:#888;">All checkpoints</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+      <div style="position:relative;">
+        <div style="background:#3a1a6e;border-radius:6px;aspect-ratio:0.85;"></div>
+        <div style="position:absolute;bottom:3px;left:3px;right:3px;background:rgba(0,0,0,0.75);border-radius:3px;padding:2px 4px;font-size:7px;color:#fff;text-align:center;">wt 0.8</div>
+      </div>
+      <div style="position:relative;">
+        <div style="background:#2a1a5e;border-radius:6px;aspect-ratio:0.85;"></div>
+        <div style="position:absolute;bottom:3px;left:3px;right:3px;background:rgba(0,0,0,0.75);border-radius:3px;padding:2px 4px;font-size:7px;color:#fff;text-align:center;">wt 0.6</div>
+      </div>
+      <div style="position:relative;">
+        <div style="background:#4a1a4e;border-radius:6px;aspect-ratio:0.85;"></div>
+        <div style="position:absolute;bottom:3px;left:3px;right:3px;background:rgba(0,0,0,0.75);border-radius:3px;padding:2px 4px;font-size:7px;color:#fff;text-align:center;">wt 0.9</div>
+      </div>
+      <div style="position:relative;">
+        <div style="background:#1a3a5e;border-radius:6px;aspect-ratio:0.85;"></div>
+        <div style="position:absolute;bottom:3px;left:3px;right:3px;background:rgba(0,0,0,0.75);border-radius:3px;padding:2px 4px;font-size:7px;color:#fff;text-align:center;">wt 0.5</div>
+      </div>
+      <div style="position:relative;">
+        <div style="background:#3a2a6e;border-radius:6px;aspect-ratio:0.85;"></div>
+        <div style="position:absolute;bottom:3px;left:3px;right:3px;background:rgba(0,0,0,0.75);border-radius:3px;padding:2px 4px;font-size:7px;color:#fff;text-align:center;">wt 0.7</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Checkpoints follow the same layout (no weight shown per-use). Does this look right?</p>

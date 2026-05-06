@@ -1,0 +1,82 @@
+<h2>Section 6 — Global Search (⌘K)</h2>
+<p class="subtitle">Search everything — Main Gens, Iterations, LoRAs, Checkpoints — with filter chips</p>
+
+<div class="mockup">
+  <div class="mockup-header">⌘K Search Overlay — triggered from anywhere in the app</div>
+  <div class="mockup-body" style="background:#0e0e0f;padding:16px;border-radius:8px;">
+
+    <!-- Search input -->
+    <div style="background:#1c1c1e;border:1px solid #7c6ff7;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="color:#555;font-size:13px;">🔍</span>
+      <input style="flex:1;background:transparent;border:none;outline:none;color:#f0f0f0;font-size:12px;" placeholder="Search main gens, iterations, LoRAs…" value="cyberpunk"/>
+      <span style="color:#555;font-size:9px;background:#2a2a2e;padding:2px 6px;border-radius:4px;">ESC</span>
+    </div>
+
+    <!-- Filter chips -->
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="background:#7c6ff7;border-radius:20px;padding:3px 10px;font-size:9px;color:#fff;">All</div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">Main Gens</div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">Iterations</div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">LoRAs</div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">Checkpoints</div>
+      <div style="width:1px;background:#2a2a2e;margin:0 2px;"></div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">⭐ Starred only</div>
+      <div style="background:#2a2a2e;border-radius:20px;padding:3px 10px;font-size:9px;color:#888;">🏷 Has tags</div>
+    </div>
+
+    <!-- Results -->
+    <div style="display:flex;flex-direction:column;gap:3px;">
+
+      <!-- Section header -->
+      <div style="color:#555;text-transform:uppercase;letter-spacing:0.8px;font-size:8px;padding:4px 0 2px;">Main Gens</div>
+
+      <div style="background:#1c1c1e;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;border:1px solid #2a2a2e;cursor:pointer;">
+        <div style="background:linear-gradient(135deg,#3a1a6e,#6e1a3a);width:32px;height:32px;border-radius:6px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:500;"><span style="color:#7c6ff7;">Cyberpunk</span> Portrait</div>
+          <div style="color:#555;font-size:9px;">8 iterations · last edited 2h ago</div>
+        </div>
+        <div style="color:#555;font-size:9px;">Main Gen →</div>
+      </div>
+
+      <!-- Section header -->
+      <div style="color:#555;text-transform:uppercase;letter-spacing:0.8px;font-size:8px;padding:6px 0 2px;">Iterations</div>
+
+      <div style="background:#1c1c1e;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;border:1px solid #2a2a2e;cursor:pointer;">
+        <div style="background:#3a1a6e;width:32px;height:32px;border-radius:6px;flex-shrink:0;position:relative;">
+          <div style="position:absolute;bottom:1px;right:1px;font-size:7px;">⭐</div>
+        </div>
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:500;"><span style="color:#7c6ff7;">Cyberpunk</span> Portrait — Iteration #3</div>
+          <div style="color:#555;font-size:9px;">seed: 42831 · detail_tweaker 0.8 · juggernaut_xl</div>
+        </div>
+        <div style="color:#555;font-size:9px;">Iteration →</div>
+      </div>
+
+      <div style="background:#1c1c1e;border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;border:1px solid #2a2a2e;cursor:pointer;">
+        <div style="background:#2a1a5e;width:32px;height:32px;border-radius:6px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="color:#f0f0f0;font-size:11px;font-weight:500;"><span style="color:#7c6ff7;">Cyberpunk</span> Portrait — Iteration #6</div>
+          <div style="color:#555;font-size:9px;">seed: 99182 · skin_realism 0.5 · juggernaut_xl</div>
+        </div>
+        <div style="color:#555;font-size:9px;">Iteration →</div>
+      </div>
+
+      <!-- No LoRA results -->
+      <div style="color:#555;text-transform:uppercase;letter-spacing:0.8px;font-size:8px;padding:6px 0 2px;">LoRAs</div>
+      <div style="color:#555;font-size:9px;padding:4px 0 0 2px;">No LoRAs matched "cyberpunk"</div>
+
+    </div>
+
+    <!-- Footer hint -->
+    <div style="display:flex;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2e;">
+      <div style="color:#555;font-size:8px;">↑↓ navigate</div>
+      <div style="color:#555;font-size:8px;">↵ open</div>
+      <div style="color:#555;font-size:8px;">ESC close</div>
+      <div style="color:#555;font-size:8px;">⌘K toggle</div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Search matches title, prompt text, tags, notes, and LoRA/checkpoint names. Match term is highlighted in results. Good to go?</p>

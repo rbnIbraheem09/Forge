@@ -1,0 +1,126 @@
+<h2>Dashboard — What's the home screen?</h2>
+<p class="subtitle">When you open Forge, what's the first thing you want to see?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;">
+      <!-- Recent Main Gens strip -->
+      <div style="font-size:8px;color:#7c6ff7;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;">Recent Main Gens</div>
+      <div style="display:flex;gap:5px;margin-bottom:10px;">
+        <div style="background:#2a2a2e;border-radius:6px;padding:6px;flex:1;font-size:7px;color:#aaa;">
+          <div style="background:#3a2a5e;height:30px;border-radius:4px;margin-bottom:4px;"></div>
+          <div style="color:#f0f0f0;font-size:8px;">Cyberpunk Portrait</div>
+          <div style="color:#555;">8 iterations</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:6px;flex:1;font-size:7px;color:#aaa;">
+          <div style="background:#2a3a2e;height:30px;border-radius:4px;margin-bottom:4px;"></div>
+          <div style="color:#f0f0f0;font-size:8px;">Landscape Study</div>
+          <div style="color:#555;">5 iterations</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:6px;flex:1;font-size:7px;color:#aaa;">
+          <div style="background:#3a2a2e;height:30px;border-radius:4px;margin-bottom:4px;"></div>
+          <div style="color:#f0f0f0;font-size:8px;">Anime Character</div>
+          <div style="color:#555;">12 iterations</div>
+        </div>
+      </div>
+      <!-- Starred -->
+      <div style="font-size:8px;color:#7c6ff7;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;">⭐ Starred Iterations</div>
+      <div style="display:flex;gap:5px;">
+        <div style="background:#2a2a2e;border-radius:6px;height:28px;flex:1;"></div>
+        <div style="background:#2a2a2e;border-radius:6px;height:28px;flex:1;"></div>
+        <div style="background:#2a2a2e;border-radius:6px;height:28px;flex:1;"></div>
+        <div style="background:#2a2a2e;border-radius:6px;height:28px;flex:1;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Recents + Starred</h3>
+      <p>Shows your most recently touched Main Gens and a strip of starred iterations. Quick-access to where you left off.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;">
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:8px;">
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px;text-align:center;">
+          <div style="color:#7c6ff7;font-size:12px;font-weight:bold;">47</div>
+          <div style="color:#555;font-size:7px;">Total Gens</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px;text-align:center;">
+          <div style="color:#7c6ff7;font-size:12px;font-weight:bold;">312</div>
+          <div style="color:#555;font-size:7px;">Iterations</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px;text-align:center;">
+          <div style="color:#7c6ff7;font-size:12px;font-weight:bold;">18</div>
+          <div style="color:#555;font-size:7px;">LoRAs used</div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px;text-align:center;">
+          <div style="color:#7c6ff7;font-size:12px;font-weight:bold;">6</div>
+          <div style="color:#555;font-size:7px;">Checkpoints</div>
+        </div>
+      </div>
+      <!-- Top LoRAs -->
+      <div style="font-size:8px;color:#7c6ff7;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Most Used LoRAs</div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="color:#aaa;font-size:7px;width:70px;">detail_tweaker</div>
+          <div style="flex:1;background:#2a2a2e;border-radius:3px;height:6px;">
+            <div style="background:#7c6ff7;width:80%;height:100%;border-radius:3px;"></div>
+          </div>
+          <div style="color:#555;font-size:7px;">24x</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="color:#aaa;font-size:7px;width:70px;">skin_realism</div>
+          <div style="flex:1;background:#2a2a2e;border-radius:3px;height:6px;">
+            <div style="background:#7c6ff7;width:50%;height:100%;border-radius:3px;"></div>
+          </div>
+          <div style="color:#555;font-size:7px;">15x</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div style="color:#aaa;font-size:7px;width:70px;">anime_style</div>
+          <div style="flex:1;background:#2a2a2e;border-radius:3px;height:6px;">
+            <div style="background:#7c6ff7;width:30%;height:100%;border-radius:3px;"></div>
+          </div>
+          <div style="color:#555;font-size:7px;">9x</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Stats & Insights</h3>
+      <p>Numbers first: total gens, iterations, most-used LoRAs, checkpoints. Gives you a high-level view of your library.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;">
+      <!-- Inbox badge -->
+      <div style="background:#2a1a1a;border:1px solid #7c3030;border-radius:6px;padding:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <div style="background:#c0392b;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;flex-shrink:0;">7</div>
+        <div style="font-size:8px;color:#f0f0f0;">7 new images detected in output folder</div>
+        <div style="margin-left:auto;font-size:7px;color:#7c6ff7;">Review →</div>
+      </div>
+      <!-- Recent + stats mixed -->
+      <div style="font-size:8px;color:#7c6ff7;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Recent Activity</div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <div style="background:#2a2a2e;border-radius:4px;padding:5px;display:flex;align-items:center;gap:6px;">
+          <div style="background:#3a2a5e;width:24px;height:24px;border-radius:3px;flex-shrink:0;"></div>
+          <div style="font-size:7px;"><div style="color:#f0f0f0;">Cyberpunk Portrait</div><div style="color:#555;">Added iteration #9 · 2h ago</div></div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:5px;display:flex;align-items:center;gap:6px;">
+          <div style="background:#2a3a2e;width:24px;height:24px;border-radius:3px;flex-shrink:0;"></div>
+          <div style="font-size:7px;"><div style="color:#f0f0f0;">Landscape Study</div><div style="color:#555;">Starred iteration #3 · 5h ago</div></div>
+        </div>
+        <div style="background:#2a2a2e;border-radius:4px;padding:5px;display:flex;align-items:center;gap:6px;">
+          <div style="background:#3a2a2e;width:24px;height:24px;border-radius:3px;flex-shrink:0;"></div>
+          <div style="font-size:7px;"><div style="color:#f0f0f0;">Anime Character</div><div style="color:#555;">Created Main Gen · yesterday</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Inbox-First + Activity Feed</h3>
+      <p>Inbox notification is front and center when new images are waiting. Below it, a chronological activity feed of everything you've done recently.</p>
+    </div>
+  </div>
+
+</div>

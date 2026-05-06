@@ -1,0 +1,16 @@
+appId: com.forge.app
+productName: Forge
+directories:
+  output: dist/package
+files:
+  - dist/renderer/**
+  - src/main/**
+  - package.json
+  - node_modules/**
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+  darkModeSupport: true
+dmg:
+  title: Forge

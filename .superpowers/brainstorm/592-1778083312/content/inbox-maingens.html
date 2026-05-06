@@ -1,0 +1,128 @@
+<h2>Section 2 — Inbox & Main Gens</h2>
+<p class="subtitle">How new images get processed and how Main Gens are browsed</p>
+
+<div class="mockup" style="margin-bottom:20px;">
+  <div class="mockup-header">📥 Inbox — New images detected, ready to assign</div>
+  <div class="mockup-body" style="background:#0e0e0f;padding:16px;border-radius:8px;">
+
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div style="color:#f0f0f0;font-size:13px;font-weight:600;">Inbox</div>
+        <div style="color:#555;font-size:10px;">7 new images from ComfyUI output folder</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px 10px;font-size:10px;color:#888;cursor:pointer;">Select All</div>
+        <div style="background:#7c6ff7;border-radius:6px;padding:5px 10px;font-size:10px;color:#fff;cursor:pointer;opacity:0.4;">Assign Selected (0)</div>
+      </div>
+    </div>
+
+    <!-- Image grid with checkboxes -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+
+      <!-- Selected item -->
+      <div style="position:relative;cursor:pointer;">
+        <div style="background:#3a2a5e;border-radius:8px;aspect-ratio:1;border:2px solid #7c6ff7;position:relative;">
+          <div style="position:absolute;top:6px;left:6px;background:#7c6ff7;border-radius:4px;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;">✓</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));border-radius:0 0 6px 6px;padding:6px;font-size:8px;color:#aaa;">
+            seed: 42831<br/>steps: 20
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected item -->
+      <div style="position:relative;cursor:pointer;">
+        <div style="background:#2a3a4e;border-radius:8px;aspect-ratio:1;border:2px solid #7c6ff7;position:relative;">
+          <div style="position:absolute;top:6px;left:6px;background:#7c6ff7;border-radius:4px;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;">✓</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));border-radius:0 0 6px 6px;padding:6px;font-size:8px;color:#aaa;">
+            seed: 99182<br/>steps: 25
+          </div>
+        </div>
+      </div>
+
+      <!-- Unselected -->
+      <div style="position:relative;cursor:pointer;">
+        <div style="background:#2e3a2a;border-radius:8px;aspect-ratio:1;border:2px solid #2a2a2e;position:relative;">
+          <div style="position:absolute;top:6px;left:6px;background:#2a2a2e;border-radius:4px;width:14px;height:14px;border:1px solid #444;"></div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));border-radius:0 0 6px 6px;padding:6px;font-size:8px;color:#aaa;">
+            seed: 11023<br/>steps: 30
+          </div>
+        </div>
+      </div>
+
+      <!-- Unselected -->
+      <div style="position:relative;cursor:pointer;">
+        <div style="background:#3a2a2e;border-radius:8px;aspect-ratio:1;border:2px solid #2a2a2e;position:relative;">
+          <div style="position:absolute;top:6px;left:6px;background:#2a2a2e;border-radius:4px;width:14px;height:14px;border:1px solid #444;"></div>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));border-radius:0 0 6px 6px;padding:6px;font-size:8px;color:#aaa;">
+            seed: 77301<br/>steps: 20
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assign panel (appears when items selected) -->
+    <div style="background:#1c1c1e;border:1px solid #7c6ff7;border-radius:8px;padding:12px;">
+      <div style="color:#f0f0f0;font-size:11px;font-weight:600;margin-bottom:8px;">Assign 2 selected images to:</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div style="background:#7c6ff7;border-radius:6px;padding:5px 10px;font-size:10px;color:#fff;">+ New Main Gen</div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px 10px;font-size:10px;color:#aaa;">Cyberpunk Portrait <span style="color:#555;">8 iters</span></div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px 10px;font-size:10px;color:#aaa;">Landscape Study <span style="color:#555;">5 iters</span></div>
+        <div style="background:#2a2a2e;border-radius:6px;padding:5px 10px;font-size:10px;color:#aaa;">Anime Character <span style="color:#555;">12 iters</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">🗂 Main Gens — Browse all your generation projects</div>
+  <div class="mockup-body" style="background:#0e0e0f;padding:16px;border-radius:8px;">
+
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="color:#f0f0f0;font-size:13px;font-weight:600;">Main Gens</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input style="background:#1c1c1e;border:1px solid #2a2a2e;border-radius:6px;padding:4px 10px;font-size:10px;color:#888;outline:none;" placeholder="Search main gens…"/>
+        <div style="background:#7c6ff7;border-radius:6px;padding:5px 10px;font-size:10px;color:#fff;">+ New</div>
+      </div>
+    </div>
+
+    <!-- Pinned section -->
+    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📌 Pinned</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+      <div style="background:#1c1c1e;border-radius:8px;overflow:hidden;border:1px solid #2a2a2e;">
+        <div style="background:linear-gradient(135deg,#3a1a6e,#6e1a3a);height:60px;position:relative;">
+          <div style="position:absolute;top:6px;right:6px;font-size:9px;">📌</div>
+        </div>
+        <div style="padding:8px;">
+          <div style="color:#f0f0f0;font-size:10px;font-weight:600;">Cyberpunk Portrait</div>
+          <div style="color:#555;font-size:9px;">8 iterations · 2d ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All section -->
+    <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">All</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div style="background:#1c1c1e;border-radius:8px;overflow:hidden;border:1px solid #2a2a2e;">
+        <div style="background:linear-gradient(135deg,#1a3a2e,#1a2e3a);height:60px;"></div>
+        <div style="padding:8px;">
+          <div style="color:#f0f0f0;font-size:10px;font-weight:600;">Landscape Study</div>
+          <div style="color:#555;font-size:9px;">5 iterations · 4d ago</div>
+        </div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:8px;overflow:hidden;border:1px solid #2a2a2e;">
+        <div style="background:linear-gradient(135deg,#3a2a1a,#2a3a1a);height:60px;"></div>
+        <div style="padding:8px;">
+          <div style="color:#f0f0f0;font-size:10px;font-weight:600;">Anime Character</div>
+          <div style="color:#555;font-size:9px;">12 iterations · 1w ago</div>
+        </div>
+      </div>
+      <div style="background:#1c1c1e;border-radius:8px;overflow:hidden;border:1px solid #2a2a2e;border-style:dashed;display:flex;align-items:center;justify-content:center;height:100px;cursor:pointer;">
+        <div style="text-align:center;color:#555;font-size:10px;">+ New Main Gen</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Does the Inbox flow and Main Gens layout look right?</p>

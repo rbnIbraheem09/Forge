@@ -1,0 +1,76 @@
+<h2>Inside a Main Gen — How do you browse iterations?</h2>
+<p class="subtitle">Once you click into a Main Gen, how should iterations be displayed?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;font-size:11px;color:#aaa;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#7c6ff7;border:1px solid #7c6ff7;">#1</div>
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;">#2</div>
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;">#3</div>
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;">#4</div>
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;">#5</div>
+        <div style="background:#2a2a2e;border-radius:6px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;">#6</div>
+      </div>
+      <div style="margin-top:8px;background:#2a2a2e;border-radius:6px;padding:8px;">
+        <div style="color:#7c6ff7;font-size:9px;margin-bottom:4px;">Iteration #1 selected</div>
+        <div style="color:#888;font-size:8px;">Prompt: a woman in red...</div>
+        <div style="color:#888;font-size:8px;">Seed: 42831 · Steps: 20 · CFG: 7</div>
+        <div style="color:#888;font-size:8px;">LoRA: detail_tweaker 0.8</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Grid + Detail Panel</h3>
+      <p>All iterations shown as a grid. Click one to expand metadata below (or in a side panel). Good for scanning lots of images quickly.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;font-size:11px;color:#aaa;">
+      <div style="display:flex;gap:6px;height:100px;">
+        <div style="flex:1;background:#2a2a2e;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#7c6ff7;border:1px solid #7c6ff7;">#1<br/><span style="color:#555;font-size:7px;">seed 42831</span></div>
+        <div style="flex:1;background:#2a2a2e;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#7c6ff7;border:1px solid #7c6ff7;">#4<br/><span style="color:#555;font-size:7px;">seed 99182</span></div>
+      </div>
+      <div style="margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+        <div style="background:#1a1a1c;border-radius:4px;padding:5px;font-size:7px;color:#aaa;">
+          <div style="color:#7c6ff7;margin-bottom:2px;">Iter #1</div>
+          <div>LoRA: none</div>
+          <div>CFG: 7 · Steps: 20</div>
+        </div>
+        <div style="background:#1a1a1c;border-radius:4px;padding:5px;font-size:7px;color:#aaa;">
+          <div style="color:#7c6ff7;margin-bottom:2px;">Iter #4</div>
+          <div>LoRA: detail 0.8</div>
+          <div>CFG: 9 · Steps: 30</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Side-by-Side Compare</h3>
+      <p>Pick any 2 iterations to compare directly, with metadata aligned side by side. Great for "did adding this LoRA actually help?" moments.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#1c1c1e;padding:12px;font-size:11px;color:#aaa;">
+      <div style="background:#2a2a2e;border-radius:6px;height:80px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#7c6ff7;margin-bottom:8px;">
+        Big preview — Iteration #3
+      </div>
+      <div style="display:flex;gap:4px;overflow:hidden;">
+        <div style="min-width:36px;background:#2a2a2e;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#555;">#1</div>
+        <div style="min-width:36px;background:#2a2a2e;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#555;">#2</div>
+        <div style="min-width:36px;background:#7c6ff7;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#fff;">#3</div>
+        <div style="min-width:36px;background:#2a2a2e;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#555;">#4</div>
+        <div style="min-width:36px;background:#2a2a2e;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#555;">#5</div>
+        <div style="min-width:36px;background:#2a2a2e;border-radius:4px;padding:4px;text-align:center;font-size:7px;color:#555;">#6</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Filmstrip Timeline</h3>
+      <p>Large image preview on top, iterations scroll horizontally as a filmstrip below. Feels like stepping through a creative timeline.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Note: These aren't mutually exclusive — e.g. A (grid) as the default with B (compare) as an on-demand mode.</p>
