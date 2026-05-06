@@ -54,6 +54,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
   useEffect(() => {
     clearTimeout(searchTimer.current)
     searchTimer.current = setTimeout(() => search(query, typeFilter, starred), 200)
+    return () => clearTimeout(searchTimer.current)
   }, [query, typeFilter, starred, search])
 
   const allResults = results ? [
