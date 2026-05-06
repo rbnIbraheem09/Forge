@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 
 const STEPS = [
   {
@@ -25,17 +26,28 @@ export default function OnboardingModal({ onDone, folders, onBrowse }) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.8)' }}>
-      <div className="rounded-2xl p-8 w-full max-w-md shadow-2xl" style={{ background: '#1c1c1e', border: '1px solid #2a2a2e' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+        className="rounded-2xl p-8 w-full max-w-md shadow-2xl"
+        style={{ background: '#1a1813', border: '1px solid #302c1e' }}
+      >
         {/* Steps indicator */}
         <div className="flex gap-1.5 mb-6">
           {STEPS.map((_, i) => (
-            <div key={i} className="h-1 flex-1 rounded-full" style={{ background: i <= step ? '#7c6ff7' : '#2a2a2e' }} />
+            <div key={i} className="h-1 flex-1 rounded-full transition-colors" style={{ background: i <= step ? '#e8c820' : '#302c1e' }} />
           ))}
         </div>
 
-        <div className="text-4xl mb-4">{current.icon}</div>
-        <h2 className="text-xl font-semibold mb-2" style={{ color: '#f0f0f0' }}>{current.title}</h2>
-        <p className="text-sm leading-relaxed mb-6" style={{ color: '#888' }}>{current.body}</p>
+        <div className="text-5xl mb-4">{current.icon}</div>
+        <h2
+          className="text-xl font-semibold mb-2"
+          style={{ color: '#eae5dc', fontFamily: 'Bricolage Grotesque, sans-serif' }}
+        >
+          {current.title}
+        </h2>
+        <p className="text-sm leading-relaxed mb-6" style={{ color: '#bfb8a8' }}>{current.body}</p>
 
         {step === 1 && (
           <div className="flex flex-col gap-3 mb-6">
@@ -45,20 +57,20 @@ export default function OnboardingModal({ onDone, folders, onBrowse }) {
               { key: 'loras_folder', label: 'LoRAs Folder', required: false },
             ].map(({ key, label, required }) => (
               <div key={key}>
-                <p className="text-xs mb-1.5" style={{ color: '#555' }}>
-                  {label} {required && <span style={{ color: '#c0392b' }}>*</span>}
+                <p className="text-xs mb-1.5" style={{ color: '#635c48' }}>
+                  {label} {required && <span style={{ color: '#e87068' }}>*</span>}
                 </p>
                 <div className="flex gap-2">
                   <div
                     className="flex-1 rounded-lg px-3 py-2 text-xs truncate"
-                    style={{ background: '#0e0e0f', border: '1px solid #2a2a2e', color: folders[key] ? '#f0f0f0' : '#555' }}
+                    style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: folders[key] ? '#eae5dc' : '#635c48' }}
                   >
                     {folders[key] || 'Not set'}
                   </div>
                   <button
                     onClick={() => onBrowse(key)}
                     className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{ background: '#7c6ff7', color: '#fff' }}
+                    style={{ background: '#e8c820', color: '#0f0e0b' }}
                   >
                     Browse
                   </button>
@@ -70,7 +82,11 @@ export default function OnboardingModal({ onDone, folders, onBrowse }) {
 
         <div className="flex gap-3 justify-end">
           {step > 0 && (
-            <button onClick={() => setStep(s => s - 1)} className="px-4 py-2 rounded-lg text-sm" style={{ background: '#2a2a2e', color: '#888' }}>
+            <button
+              onClick={() => setStep(s => s - 1)}
+              className="px-4 py-2 rounded-lg text-sm"
+              style={{ background: '#242118', color: '#635c48' }}
+            >
               Back
             </button>
           )}
@@ -79,15 +95,15 @@ export default function OnboardingModal({ onDone, folders, onBrowse }) {
             disabled={step === 1 && !folders.output_folder}
             className="px-5 py-2 rounded-lg text-sm font-medium"
             style={{
-              background: '#7c6ff7',
-              color: '#fff',
+              background: '#e8c820',
+              color: '#0f0e0b',
               opacity: step === 1 && !folders.output_folder ? 0.5 : 1,
             }}
           >
             {isLast ? 'Open Forge' : 'Continue'}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

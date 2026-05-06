@@ -9,28 +9,28 @@ const FOLDER_SETTINGS = [
 
 function FolderRow({ label, description, value, onBrowse, onClear }) {
   return (
-    <div className="rounded-xl p-5" style={{ background: '#1c1c1e', border: '1px solid #2a2a2e' }}>
+    <div className="rounded-xl p-5" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
       <div className="mb-3">
-        <p className="text-sm font-medium" style={{ color: '#f0f0f0' }}>{label}</p>
-        <p className="text-xs mt-0.5" style={{ color: '#888' }}>{description}</p>
+        <p className="text-sm font-medium" style={{ color: '#eae5dc' }}>{label}</p>
+        <p className="text-xs mt-0.5" style={{ color: '#bfb8a8' }}>{description}</p>
       </div>
       <div className="flex items-center gap-2">
         <input
           readOnly value={value || ''}
           placeholder="Not set"
           className="flex-1 rounded-lg px-3 py-2 text-sm outline-none truncate"
-          style={{ background: '#0e0e0f', border: '1px solid #2a2a2e', color: value ? '#f0f0f0' : '#555' }}
+          style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: value ? '#eae5dc' : '#635c48' }}
         />
         <button
           onClick={onBrowse}
           className="px-3 py-2 rounded-lg text-sm font-medium"
-          style={{ background: '#7c6ff7', color: '#fff' }}
+          style={{ background: '#e8c820', color: '#0f0e0b' }}
         >Browse…</button>
         {value && (
           <button
             onClick={onClear}
             className="px-3 py-2 rounded-lg text-sm"
-            style={{ background: '#2a2a2e', color: '#888' }}
+            style={{ background: '#242118', color: '#635c48' }}
           >Clear</button>
         )}
       </div>
@@ -113,11 +113,16 @@ export default function Settings() {
   }
 
   return (
-    <div className="h-full overflow-y-auto" style={{ background: '#0e0e0f' }}>
+    <div className="h-full overflow-y-auto" style={{ background: '#0f0e0b' }}>
       <div className="max-w-2xl mx-auto px-8 py-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold" style={{ color: '#f0f0f0' }}>Settings</h1>
-          <p className="text-sm mt-1" style={{ color: '#888' }}>Configure your folder paths. Forge never moves or copies your files.</p>
+          <h1
+            className="text-2xl font-semibold"
+            style={{ color: '#eae5dc', fontFamily: 'Bricolage Grotesque, sans-serif' }}
+          >
+            Settings
+          </h1>
+          <p className="text-sm mt-1" style={{ color: '#bfb8a8' }}>Configure your folder paths. Forge never moves or copies your files.</p>
         </div>
 
         <div className="flex flex-col gap-4 mb-8">
@@ -132,41 +137,65 @@ export default function Settings() {
         </div>
 
         {/* Rescan buttons */}
-        <div className="rounded-xl p-5 mb-4" style={{ background: '#1c1c1e', border: '1px solid #2a2a2e' }}>
-          <p className="text-sm font-medium mb-1" style={{ color: '#f0f0f0' }}>Rescan Libraries</p>
-          <p className="text-xs mb-4" style={{ color: '#888' }}>Re-reads your LoRA and Checkpoint folders to pick up new or removed files.</p>
+        <div className="rounded-xl p-5 mb-4" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
+          <p className="text-sm font-medium mb-1" style={{ color: '#eae5dc' }}>Rescan Libraries</p>
+          <p className="text-xs mb-4" style={{ color: '#bfb8a8' }}>Re-reads your LoRA and Checkpoint folders to pick up new or removed files.</p>
           <div className="flex gap-3">
-            <button onClick={rescanLoras} disabled={scanning.loras} className="px-4 py-2 rounded-lg text-sm" style={{ background: '#2a2a2e', color: '#888' }}>
+            <button
+              onClick={rescanLoras}
+              disabled={scanning.loras}
+              className="px-4 py-2 rounded-lg text-sm transition-colors"
+              style={{ background: '#242118', color: '#bfb8a8' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#302c1e'}
+              onMouseLeave={e => e.currentTarget.style.background = '#242118'}
+            >
               {scanning.loras ? 'Scanning…' : '↻ Rescan LoRAs'}
             </button>
-            <button onClick={rescanCheckpoints} disabled={scanning.checkpoints} className="px-4 py-2 rounded-lg text-sm" style={{ background: '#2a2a2e', color: '#888' }}>
+            <button
+              onClick={rescanCheckpoints}
+              disabled={scanning.checkpoints}
+              className="px-4 py-2 rounded-lg text-sm transition-colors"
+              style={{ background: '#242118', color: '#bfb8a8' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#302c1e'}
+              onMouseLeave={e => e.currentTarget.style.background = '#242118'}
+            >
               {scanning.checkpoints ? 'Scanning…' : '↻ Rescan Checkpoints'}
             </button>
           </div>
         </div>
 
         {/* Gallery size */}
-        <div className="rounded-xl p-5 mb-4" style={{ background: '#1c1c1e', border: '1px solid #2a2a2e' }}>
-          <p className="text-sm font-medium mb-1" style={{ color: '#f0f0f0' }}>Default Gallery Size</p>
-          <p className="text-xs mb-4" style={{ color: '#888' }}>Default thumbnail size in the iteration gallery.</p>
-          <div className="flex rounded-lg overflow-hidden w-fit" style={{ border: '1px solid #2a2a2e' }}>
+        <div className="rounded-xl p-5 mb-4" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
+          <p className="text-sm font-medium mb-1" style={{ color: '#eae5dc' }}>Default Gallery Size</p>
+          <p className="text-xs mb-4" style={{ color: '#bfb8a8' }}>Default thumbnail size in the iteration gallery.</p>
+          <div className="flex rounded-lg overflow-hidden w-fit" style={{ border: '1px solid #302c1e' }}>
             {['S', 'M', 'L'].map(s => (
-              <button key={s} onClick={() => setGalleryDefault(s)} className="px-5 py-2 text-sm font-medium" style={{ background: gallerySize === s ? '#7c6ff7' : '#1c1c1e', color: gallerySize === s ? '#fff' : '#888' }}>{s}</button>
+              <button
+                key={s}
+                onClick={() => setGalleryDefault(s)}
+                className="px-5 py-2 text-sm font-medium"
+                style={{
+                  background: gallerySize === s ? '#e8c820' : '#1a1813',
+                  color: gallerySize === s ? '#0f0e0b' : '#635c48',
+                }}
+              >
+                {s}
+              </button>
             ))}
           </div>
         </div>
 
         {/* Auto-scan toggle */}
-        <div className="rounded-xl p-5" style={{ background: '#1c1c1e', border: '1px solid #2a2a2e' }}>
+        <div className="rounded-xl p-5" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium" style={{ color: '#f0f0f0' }}>Auto-scan Output Folder</p>
-              <p className="text-xs mt-0.5" style={{ color: '#888' }}>Automatically detect new images in your ComfyUI output folder.</p>
+              <p className="text-sm font-medium" style={{ color: '#eae5dc' }}>Auto-scan Output Folder</p>
+              <p className="text-xs mt-0.5" style={{ color: '#bfb8a8' }}>Automatically detect new images in your ComfyUI output folder.</p>
             </div>
             <button
               onClick={toggleAutoScan}
               className="w-11 h-6 rounded-full transition-colors relative"
-              style={{ background: autoScan ? '#7c6ff7' : '#2a2a2e' }}
+              style={{ background: autoScan ? '#e8c820' : '#302c1e' }}
             >
               <div
                 className="absolute top-0.5 w-5 h-5 rounded-full transition-transform"
