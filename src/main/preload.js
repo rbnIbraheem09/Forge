@@ -7,4 +7,71 @@ contextBridge.exposeInMainWorld('forge', {
     getAll: () => ipcRenderer.invoke('settings:getAll'),
     openFolderPicker: () => ipcRenderer.invoke('settings:openFolderPicker'),
   },
+  inbox: {
+    list: () => ipcRenderer.invoke('inbox:list'),
+    count: () => ipcRenderer.invoke('inbox:count'),
+    assign: (args) => ipcRenderer.invoke('inbox:assign', args),
+    dismiss: (args) => ipcRenderer.invoke('inbox:dismiss', args),
+  },
+  mainGens: {
+    list: () => ipcRenderer.invoke('main-gens:list'),
+    get: (id) => ipcRenderer.invoke('main-gens:get', { id }),
+    create: (title) => ipcRenderer.invoke('main-gens:create', { title }),
+    update: (args) => ipcRenderer.invoke('main-gens:update', args),
+    delete: (id) => ipcRenderer.invoke('main-gens:delete', { id }),
+    setHero: (id, iterationId) => ipcRenderer.invoke('main-gens:set-hero', { id, iterationId }),
+  },
+  iterations: {
+    list: (mainGenId) => ipcRenderer.invoke('iterations:list', { mainGenId }),
+    get: (id) => ipcRenderer.invoke('iterations:get', { id }),
+    create: (args) => ipcRenderer.invoke('iterations:create', args),
+    update: (args) => ipcRenderer.invoke('iterations:update', args),
+    delete: (id) => ipcRenderer.invoke('iterations:delete', { id }),
+    setLoras: (id, loras) => ipcRenderer.invoke('iterations:set-loras', { id, loras }),
+    setCustomFields: (id, fields) => ipcRenderer.invoke('iterations:set-custom-fields', { id, fields }),
+  },
+  globalFields: {
+    list: () => ipcRenderer.invoke('global-fields:list'),
+    pin: (key) => ipcRenderer.invoke('global-fields:pin', { key }),
+    unpin: (key) => ipcRenderer.invoke('global-fields:unpin', { key }),
+  },
+  loras: {
+    scan: () => ipcRenderer.invoke('loras:scan'),
+    list: () => ipcRenderer.invoke('loras:list'),
+    get: (id) => ipcRenderer.invoke('loras:get', { id }),
+    update: (args) => ipcRenderer.invoke('loras:update', args),
+    usage: (args) => ipcRenderer.invoke('loras:usage', args),
+    create: (args) => ipcRenderer.invoke('loras:create', args),
+  },
+  models: {
+    scan: () => ipcRenderer.invoke('models:scan'),
+    list: () => ipcRenderer.invoke('models:list'),
+    get: (id) => ipcRenderer.invoke('models:get', { id }),
+    update: (args) => ipcRenderer.invoke('models:update', args),
+    usage: (id) => ipcRenderer.invoke('models:usage', { id }),
+    create: (args) => ipcRenderer.invoke('models:create', args),
+  },
+  dashboard: {
+    stats: () => ipcRenderer.invoke('dashboard:stats'),
+    topLoras: () => ipcRenderer.invoke('dashboard:top-loras'),
+    topCheckpoints: () => ipcRenderer.invoke('dashboard:top-checkpoints'),
+    pinnedMainGens: () => ipcRenderer.invoke('dashboard:pinned-main-gens'),
+    starredIterations: () => ipcRenderer.invoke('dashboard:starred-iterations'),
+    recentMainGens: () => ipcRenderer.invoke('dashboard:recent-main-gens'),
+  },
+  search: {
+    query: (args) => ipcRenderer.invoke('search:query', args),
+  },
+  scanner: {
+    restart: () => ipcRenderer.send('scanner:restart'),
+  },
+  on: (channel, callback) => {
+    const allowed = ['inbox:new-item']
+    if (allowed.includes(channel)) {
+      ipcRenderer.on(channel, (_e, ...args) => callback(...args))
+    }
+  },
+  off: (channel, callback) => {
+    ipcRenderer.removeListener(channel, callback)
+  },
 })
