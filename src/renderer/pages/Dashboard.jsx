@@ -67,6 +67,18 @@ export default function Dashboard() {
   const maxLora = Math.max(...topLoras.map(l => l.usage_count), 1)
   const maxCkpt = Math.max(...topCheckpoints.map(c => c.usage_count), 1)
 
+  if (stats.mainGensCount === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center gap-3" style={{ background: '#0e0e0f' }}>
+        <div className="text-3xl">🏠</div>
+        <p className="text-sm font-medium" style={{ color: '#f0f0f0' }}>Welcome to Forge</p>
+        <p className="text-xs text-center" style={{ color: '#555', maxWidth: '280px' }}>
+          Set your ComfyUI output folder in Settings, then assign images from the Inbox to get started.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full overflow-y-auto p-6" style={{ background: '#0e0e0f' }}>
       <h1 className="text-xl font-semibold mb-6" style={{ color: '#f0f0f0' }}>Dashboard</h1>
@@ -168,13 +180,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {stats.mainGensCount === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 gap-3">
-          <div className="text-3xl">🏠</div>
-          <p className="text-sm font-medium" style={{ color: '#f0f0f0' }}>Welcome to Forge</p>
-          <p className="text-xs" style={{ color: '#555' }}>Set your ComfyUI output folder in Settings, then assign images from the Inbox to get started.</p>
-        </div>
-      )}
     </div>
   )
 }
