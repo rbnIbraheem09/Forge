@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useToast } from '../context/ToastContext.jsx'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 
 const FOLDER_SETTINGS = [
   { key: 'output_folder', label: 'ComfyUI Output Folder', description: 'Where ComfyUI saves your generated images.' },
@@ -46,6 +47,8 @@ export default function Settings() {
   const [libStatus, setLibStatus] = useState(null)
   const [libProgress, setLibProgress] = useState(null)
   const [libRefreshing, setLibRefreshing] = useState(false)
+  const [libDeleting, setLibDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const showToast = useToast()
 
   useEffect(() => {
@@ -131,6 +134,25 @@ export default function Settings() {
     } finally {
       setLibRefreshing(false)
       setLibProgress(null)
+    }
+  }
+
+  const deleteTagLibrary = async () => {
+    setConfirmDelete(false)
+    setLibDeleting(true)
+    try {
+      const result = await window.forge.prompt.libraryDelete()
+      if (result.ok) {
+        showToast(`Tag library deleted (${result.deleted_rows.toLocaleString()} tags removed).`)
+      } else {
+        showToast(`Delete failed: ${result.reason}`)
+      }
+      const fresh = await window.forge.prompt.libraryStatus()
+      setLibStatus(fresh)
+    } catch (err) {
+      showToast(`Delete error: ${err.message || err}`)
+    } finally {
+      setLibDeleting(false)
     }
   }
 
@@ -285,22 +307,49 @@ export default function Settings() {
             </div>
           )}
 
-          <button
-            onClick={refreshTagLibrary}
-            disabled={libRefreshing}
-            className="px-4 py-2 rounded-lg text-sm transition-colors"
-            style={{
-              background: libRefreshing ? '#302c1e' : '#242118',
-              color: libRefreshing ? '#635c48' : '#bfb8a8',
-              cursor: libRefreshing ? 'not-allowed' : 'pointer',
-            }}
-            onMouseEnter={e => { if (!libRefreshing) e.currentTarget.style.background = '#302c1e' }}
-            onMouseLeave={e => { if (!libRefreshing) e.currentTarget.style.background = '#242118' }}
-          >
-            {libRefreshing ? 'Refreshing…' : libStatus && libStatus.count > 0 ? '↻ Refresh tag library' : '⇩ Download tag library'}
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={refreshTagLibrary}
+              disabled={libRefreshing || libDeleting}
+              className="px-4 py-2 rounded-lg text-sm transition-colors"
+              style={{
+                background: (libRefreshing || libDeleting) ? '#302c1e' : '#242118',
+                color: (libRefreshing || libDeleting) ? '#635c48' : '#bfb8a8',
+                cursor: (libRefreshing || libDeleting) ? 'not-allowed' : 'pointer',
+              }}
+              onMouseEnter={e => { if (!libRefreshing && !libDeleting) e.currentTarget.style.background = '#302c1e' }}
+              onMouseLeave={e => { if (!libRefreshing && !libDeleting) e.currentTarget.style.background = '#242118' }}
+            >
+              {libRefreshing ? 'Refreshing…' : libStatus && libStatus.count > 0 ? '↻ Refresh tag library' : '⇩ Download tag library'}
+            </button>
+
+            {libStatus && libStatus.count > 0 && (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                disabled={libRefreshing || libDeleting}
+                className="px-4 py-2 rounded-lg text-sm transition-colors"
+                style={{
+                  background: (libRefreshing || libDeleting) ? '#1a0d0d' : '#2a1010',
+                  color: (libRefreshing || libDeleting) ? '#5a3030' : '#e87068',
+                  cursor: (libRefreshing || libDeleting) ? 'not-allowed' : 'pointer',
+                }}
+                onMouseEnter={e => { if (!libRefreshing && !libDeleting) e.currentTarget.style.background = '#3a1818' }}
+                onMouseLeave={e => { if (!libRefreshing && !libDeleting) e.currentTarget.style.background = '#2a1010' }}
+              >
+                {libDeleting ? 'Deleting…' : '🗑 Delete tag library'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        title="Delete tag library?"
+        message="This removes ~500 MB of indexed tags and embeddings from disk. You can re-download anytime."
+        onConfirm={deleteTagLibrary}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   )
 }

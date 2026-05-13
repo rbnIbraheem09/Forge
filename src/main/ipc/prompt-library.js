@@ -79,6 +79,36 @@ function registerPromptLibraryHandlers() {
       refreshInProgress = false
     }
   })
+
+  ipcMain.handle('prompt:library-delete', async () => {
+    if (refreshInProgress) {
+      return { ok: false, reason: 'Cannot delete while refresh is in progress' }
+    }
+    const db = getDatabase()
+    try {
+      // Drop in-memory cache before wiping the table.
+      unloadEmbeddingCache()
+      const before = db.prepare('SELECT COUNT(*) as c FROM danbooru_tags').get().c
+      db.exec('DELETE FROM danbooru_tags')
+      db.prepare("DELETE FROM settings WHERE key IN ('danbooru_library_version','danbooru_library_count','danbooru_library_indexed')").run()
+
+      // Best-effort: remove the cached CSV file too.
+      try {
+        const path = require('path')
+        const fs = require('fs')
+        const { app } = require('electron')
+        const csvPath = path.join(app.getPath('userData'), 'tags-cache', 'danbooru.csv')
+        if (fs.existsSync(csvPath)) fs.unlinkSync(csvPath)
+      } catch {}
+
+      // SQLite doesn't reclaim space until VACUUM; run it now so the user sees the file shrink.
+      try { db.exec('VACUUM') } catch {}
+
+      return { ok: true, deleted_rows: before }
+    } catch (err) {
+      return { ok: false, reason: String(err && err.message || err) }
+    }
+  })
 }
 
 module.exports = { registerPromptLibraryHandlers }

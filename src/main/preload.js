@@ -75,6 +75,7 @@ contextBridge.exposeInMainWorld('forge', {
     searchTags: (query, options) => ipcRenderer.invoke('prompt:search-tags', { query, options }),
     libraryStatus: () => ipcRenderer.invoke('prompt:library-status'),
     libraryRefresh: () => ipcRenderer.invoke('prompt:library-refresh'),
+    libraryDelete: () => ipcRenderer.invoke('prompt:library-delete'),
   },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),
