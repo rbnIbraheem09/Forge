@@ -4,6 +4,14 @@ const { getDatabase } = require('../db/database')
 const { scanCheckpointsFolder } = require('../scanner/folder-scanner')
 const { saveBufferAsExample, copyFileAsExample, unlinkExample } = require('../examples/example-images')
 
+// Must match src/renderer/lib/model-families.js MODEL_FAMILIES.
+const MODEL_FAMILY_VALUES = new Set([
+  'pony_xl', 'illustrious', 'animagine_xl',
+  'sdxl_realistic', 'sdxl_anime',
+  'sd15_anime', 'sd15_realistic',
+  'other',
+])
+
 function registerModelsHandlers() {
   ipcMain.handle('models:scan', () => {
     const db = getDatabase()
@@ -42,7 +50,7 @@ function registerModelsHandlers() {
     return model
   })
 
-  ipcMain.handle('models:update', (_e, { id, notes, recommended_cfg, recommended_steps }) => {
+  ipcMain.handle('models:update', (_e, { id, notes, recommended_cfg, recommended_steps, family }) => {
     const db = getDatabase()
     const fields = []
     const values = []
@@ -54,6 +62,13 @@ function registerModelsHandlers() {
     if (recommended_steps !== undefined) {
       const clamped = recommended_steps === null ? null : Math.min(150, Math.max(1, Math.round(Number(recommended_steps))))
       fields.push('recommended_steps = ?'); values.push(clamped)
+    }
+    if (family !== undefined) {
+      // null clears the classification; any string must be in the enum.
+      if (family !== null && !MODEL_FAMILY_VALUES.has(family)) {
+        return false  // reject invalid enum value silently
+      }
+      fields.push('family = ?'); values.push(family)
     }
     if (fields.length === 0) return true
     db.prepare(`UPDATE models SET ${fields.join(', ')} WHERE id = ?`).run(...values, id)
