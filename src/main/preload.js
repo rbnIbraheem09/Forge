@@ -71,11 +71,16 @@ contextBridge.exposeInMainWorld('forge', {
   search: {
     query: (args) => ipcRenderer.invoke('search:query', args),
   },
+  prompt: {
+    searchTags: (query, options) => ipcRenderer.invoke('prompt:search-tags', { query, options }),
+    libraryStatus: () => ipcRenderer.invoke('prompt:library-status'),
+    libraryRefresh: () => ipcRenderer.invoke('prompt:library-refresh'),
+  },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),
   },
   on: (channel, callback) => {
-    const allowed = ['inbox:new-item']
+    const allowed = ['inbox:new-item', 'prompt:library-progress']
     if (allowed.includes(channel)) {
       ipcRenderer.on(channel, (_e, ...args) => callback(...args))
     }
