@@ -28,22 +28,32 @@ async function downloadCsv(onProgress = () => {}) {
   let downloadedBytes = 0
 
   const writer = fs.createWriteStream(tmpPath)
-  const reader = resp.body.getReader()
+  let downloadFailed = false
+  try {
+    const reader = resp.body.getReader()
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      writer.write(Buffer.from(value))
+      downloadedBytes += value.length
+      onProgress({ phase: 'download', current: downloadedBytes, total: totalBytes })
+    }
 
-  while (true) {
-    const { value, done } = await reader.read()
-    if (done) break
-    writer.write(Buffer.from(value))
-    downloadedBytes += value.length
-    onProgress({ phase: 'download', current: downloadedBytes, total: totalBytes })
+    await new Promise((resolve, reject) => {
+      writer.end((err) => err ? reject(err) : resolve())
+    })
+
+    // Atomic rename only after the full file is written.
+    fs.renameSync(tmpPath, cachePath)
+  } catch (err) {
+    downloadFailed = true
+    throw err
+  } finally {
+    if (downloadFailed) {
+      try { writer.destroy() } catch {}
+      try { fs.rmSync(tmpPath, { force: true }) } catch {}
+    }
   }
-
-  await new Promise((resolve, reject) => {
-    writer.end((err) => err ? reject(err) : resolve())
-  })
-
-  // Atomic rename only after the full file is written.
-  fs.renameSync(tmpPath, cachePath)
 
   return { path: cachePath, bytes: downloadedBytes }
 }
