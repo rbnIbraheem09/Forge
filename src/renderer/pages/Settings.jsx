@@ -49,6 +49,12 @@ export default function Settings() {
   const [libRefreshing, setLibRefreshing] = useState(false)
   const [libDeleting, setLibDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [apiKeyValue, setApiKeyValue] = useState('')
+  const [apiKeySaved, setApiKeySaved] = useState(false)
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [apiKeyTesting, setApiKeyTesting] = useState(false)
+  const [aiModel, setAiModel] = useState('deepseek-v4-flash')
+  const [defaultTemp, setDefaultTemp] = useState(1.0)
   const showToast = useToast()
 
   useEffect(() => {
@@ -64,6 +70,12 @@ export default function Settings() {
     const handler = (payload) => setLibProgress(payload)
     window.forge.on('prompt:library-progress', handler)
     return () => window.forge.off('prompt:library-progress', handler)
+  }, [])
+
+  useEffect(() => {
+    window.forge.prompt.hasApiKey().then(setApiKeySaved).catch(() => {})
+    window.forge.settings.get('deepseek_model').then((v) => { if (v) setAiModel(v) }).catch(() => {})
+    window.forge.settings.get('prompt_default_temperature').then((v) => { if (v) setDefaultTemp(parseFloat(v)) }).catch(() => {})
   }, [])
 
   const handleBrowse = useCallback(async (key) => {
@@ -154,6 +166,51 @@ export default function Settings() {
     } finally {
       setLibDeleting(false)
     }
+  }
+
+  const saveApiKey = async () => {
+    const result = await window.forge.prompt.setApiKey(apiKeyValue)
+    if (result.ok) {
+      setApiKeySaved(true)
+      setApiKeyValue('')
+      showToast('API key saved.')
+    } else {
+      showToast(`Failed to save key: ${result.reason}`)
+    }
+  }
+
+  const clearApiKey = async () => {
+    const result = await window.forge.prompt.setApiKey(null)
+    if (result.ok) {
+      setApiKeySaved(false)
+      setApiKeyValue('')
+      showToast('API key cleared.')
+    }
+  }
+
+  const testApiKey = async () => {
+    setApiKeyTesting(true)
+    try {
+      const result = await window.forge.prompt.testApiKey()
+      if (result.ok) {
+        showToast('Connection OK.')
+      } else {
+        showToast(`Connection failed: ${result.reason}`)
+      }
+    } finally {
+      setApiKeyTesting(false)
+    }
+  }
+
+  const changeModel = async (next) => {
+    setAiModel(next)
+    await window.forge.settings.set('deepseek_model', next)
+    showToast('Model updated.')
+  }
+
+  const changeDefaultTemp = async (next) => {
+    setDefaultTemp(next)
+    await window.forge.settings.set('prompt_default_temperature', String(next))
   }
 
   const toggleAutoScan = async () => {
@@ -254,6 +311,117 @@ export default function Settings() {
                 style={{ background: '#fff', transform: autoScan ? 'translateX(22px)' : 'translateX(2px)' }}
               />
             </button>
+          </div>
+        </div>
+
+        {/* DeepSeek API */}
+        <div className="rounded-xl p-5 mt-4" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
+          <p className="text-sm font-medium mb-1" style={{ color: '#eae5dc' }}>DeepSeek API</p>
+          <p className="text-xs mb-4" style={{ color: '#bfb8a8' }}>
+            The Prompt Builder uses DeepSeek to convert your natural-language descriptions into Danbooru-style tag prompts. Your API key is encrypted in your OS keychain.
+          </p>
+
+          {/* API key */}
+          <div className="mb-4">
+            <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>API key</p>
+            {apiKeySaved && !apiKeyValue ? (
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value="•••••••••••••••••••••••"
+                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none font-mono"
+                  style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#bfb8a8' }}
+                />
+                <button
+                  onClick={testApiKey}
+                  disabled={apiKeyTesting}
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{ background: apiKeyTesting ? '#302c1e' : '#242118', color: apiKeyTesting ? '#635c48' : '#bfb8a8', cursor: apiKeyTesting ? 'not-allowed' : 'pointer' }}
+                >
+                  {apiKeyTesting ? 'Testing…' : 'Test'}
+                </button>
+                <button
+                  onClick={clearApiKey}
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{ background: '#2a1010', color: '#e87068' }}
+                >
+                  Clear
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={apiKeyValue}
+                  onChange={(e) => setApiKeyValue(e.target.value)}
+                  placeholder="sk-..."
+                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none font-mono"
+                  style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#eae5dc' }}
+                />
+                <button
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{ background: '#242118', color: '#bfb8a8' }}
+                >
+                  {showApiKey ? 'Hide' : 'Show'}
+                </button>
+                <button
+                  onClick={saveApiKey}
+                  disabled={!apiKeyValue.trim()}
+                  className="px-3 py-2 rounded-lg text-sm font-medium"
+                  style={{ background: apiKeyValue.trim() ? '#e8c820' : '#302c1e', color: apiKeyValue.trim() ? '#0f0e0b' : '#635c48', cursor: apiKeyValue.trim() ? 'pointer' : 'not-allowed' }}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Model */}
+          <div className="mb-4">
+            <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Model</p>
+            <div className="flex rounded-lg overflow-hidden w-fit" style={{ border: '1px solid #302c1e' }}>
+              {[
+                { key: 'deepseek-v4-flash', label: 'V4 Flash (default)' },
+                { key: 'deepseek-v4-pro', label: 'V4 Pro (no temperature)' },
+              ].map(m => (
+                <button
+                  key={m.key}
+                  onClick={() => changeModel(m.key)}
+                  className="px-4 py-2 text-sm font-medium"
+                  style={{
+                    background: aiModel === m.key ? '#e8c820' : '#1a1813',
+                    color: aiModel === m.key ? '#0f0e0b' : '#635c48',
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Default temperature */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Default temperature</p>
+              <span className="text-xs font-mono" style={{ color: '#e8c820' }}>{defaultTemp.toFixed(1)}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.1"
+              value={defaultTemp}
+              onChange={(e) => changeDefaultTemp(parseFloat(e.target.value))}
+              disabled={aiModel === 'deepseek-v4-pro'}
+              className="w-full"
+              style={{ accentColor: '#e8c820' }}
+            />
+            <p className="text-[10px] mt-1.5" style={{ color: '#635c48' }}>
+              {aiModel === 'deepseek-v4-pro'
+                ? 'V4 Pro ignores temperature.'
+                : 'DeepSeek recommends 0.6–0.8 for structured output; values above 1.5 may hallucinate non-canonical tags.'}
+            </p>
           </div>
         </div>
 
