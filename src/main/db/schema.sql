@@ -144,3 +144,29 @@ CREATE TRIGGER IF NOT EXISTS danbooru_tags_au AFTER UPDATE ON danbooru_tags BEGI
   INSERT INTO danbooru_tags_fts(danbooru_tags_fts, rowid, name, aliases) VALUES('delete', old.id, old.name, old.aliases);
   INSERT INTO danbooru_tags_fts(rowid, name, aliases) VALUES (new.id, new.name, new.aliases);
 END;
+
+CREATE TABLE IF NOT EXISTS prompt_chat_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  checkpoint_id INTEGER REFERENCES models(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_prompt_chat_sessions_updated_at ON prompt_chat_sessions(updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS prompt_chat_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id INTEGER NOT NULL REFERENCES prompt_chat_sessions(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user','assistant','tool')),
+  content TEXT,
+  structured_response TEXT,
+  lora_ids_snapshot TEXT,
+  model_family TEXT,
+  temperature REAL,
+  tool_calls_count INTEGER DEFAULT 0,
+  latency_ms INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_prompt_chat_messages_session ON prompt_chat_messages(session_id, id);

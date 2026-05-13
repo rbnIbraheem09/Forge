@@ -62,7 +62,11 @@ function getDatabase() {
     // in case future hardening (e.g. backfilling) is added.
   }
 
-  db.pragma('user_version = 6')
+  if (version < 7) {
+    // prompt_chat_sessions and prompt_chat_messages are created idempotently by schema.sql.
+  }
+
+  db.pragma('user_version = 7')
 
   return db
 }
