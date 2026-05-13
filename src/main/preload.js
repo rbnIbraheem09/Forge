@@ -92,6 +92,12 @@ contextBridge.exposeInMainWorld('forge', {
     messages: {
       list: (sessionId) => ipcRenderer.invoke('prompt:messages:list', { sessionId }),
     },
+    presets: {
+      list: () => ipcRenderer.invoke('prompt:presets:list'),
+      save: (args) => ipcRenderer.invoke('prompt:presets:save', args),
+      delete: (id) => ipcRenderer.invoke('prompt:presets:delete', { id }),
+      rename: (id, name) => ipcRenderer.invoke('prompt:presets:rename', { id, name }),
+    },
   },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),
