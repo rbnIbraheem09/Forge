@@ -117,3 +117,30 @@ CREATE TABLE IF NOT EXISTS model_example_images (
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS danbooru_tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  category INTEGER NOT NULL DEFAULT 0,
+  post_count INTEGER NOT NULL DEFAULT 0,
+  aliases TEXT,
+  embedding BLOB
+);
+
+CREATE INDEX IF NOT EXISTS idx_danbooru_tags_post_count ON danbooru_tags(post_count DESC);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS danbooru_tags_fts USING fts5(
+  name, aliases,
+  content='danbooru_tags', content_rowid='id'
+);
+
+CREATE TRIGGER IF NOT EXISTS danbooru_tags_ai AFTER INSERT ON danbooru_tags BEGIN
+  INSERT INTO danbooru_tags_fts(rowid, name, aliases) VALUES (new.id, new.name, new.aliases);
+END;
+CREATE TRIGGER IF NOT EXISTS danbooru_tags_ad AFTER DELETE ON danbooru_tags BEGIN
+  INSERT INTO danbooru_tags_fts(danbooru_tags_fts, rowid, name, aliases) VALUES('delete', old.id, old.name, old.aliases);
+END;
+CREATE TRIGGER IF NOT EXISTS danbooru_tags_au AFTER UPDATE ON danbooru_tags BEGIN
+  INSERT INTO danbooru_tags_fts(danbooru_tags_fts, rowid, name, aliases) VALUES('delete', old.id, old.name, old.aliases);
+  INSERT INTO danbooru_tags_fts(rowid, name, aliases) VALUES (new.id, new.name, new.aliases);
+END;

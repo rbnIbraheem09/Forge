@@ -56,7 +56,13 @@ function getDatabase() {
     try { db.exec('ALTER TABLE models ADD COLUMN family TEXT') } catch {}
   }
 
-  db.pragma('user_version = 5')
+  if (version < 6) {
+    // Tag library tables are created idempotently by schema.sql above — no ALTER needed.
+    // This guard exists to document the version bump and reserve the migration step
+    // in case future hardening (e.g. backfilling) is added.
+  }
+
+  db.pragma('user_version = 6')
 
   return db
 }
