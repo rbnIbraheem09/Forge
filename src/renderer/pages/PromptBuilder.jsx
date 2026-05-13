@@ -15,6 +15,8 @@ export default function PromptBuilder() {
   const [recentToolCall, setRecentToolCall] = useState(null)
   const [defaultTemp, setDefaultTemp] = useState(1.0)
   const [transcriptTick, setTranscriptTick] = useState(0)
+  const [libraryReady, setLibraryReady] = useState(true)
+  const [apiKeySet, setApiKeySet] = useState(true)
   const showToast = useToast()
   const insertTagRef = useRef(null)
 
@@ -26,6 +28,11 @@ export default function PromptBuilder() {
     window.forge.settings.get('prompt_default_temperature').then((v) => {
       if (v) setDefaultTemp(parseFloat(v))
     }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    window.forge.prompt.libraryStatus().then((s) => setLibraryReady(s.indexed && s.count > 0)).catch(() => setLibraryReady(false))
+    window.forge.prompt.hasApiKey().then(setApiKeySet).catch(() => setApiKeySet(false))
   }, [])
 
   useEffect(() => {
@@ -168,36 +175,74 @@ export default function PromptBuilder() {
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        <div className="flex-shrink-0" style={{ width: '220px', background: '#0f0e0b', borderRight: '1px solid #302c1e' }}>
-          <TagLibraryPanel onInsertTag={handleInsertTag} />
+      {!libraryReady ? (
+        <div className="flex flex-1 items-center justify-center" style={{ background: '#0f0e0b' }}>
+          <div style={{ background: '#1a1813', border: '1px solid #302c1e', borderRadius: 12, padding: 28, maxWidth: 460, textAlign: 'center' }}>
+            <p style={{ fontSize: 16, fontFamily: 'Bricolage Grotesque, sans-serif', fontWeight: 600, color: '#eae5dc', marginBottom: 8 }}>
+              Tag library not downloaded
+            </p>
+            <p style={{ fontSize: 13, color: '#bfb8a8', marginBottom: 18, lineHeight: 1.5 }}>
+              The Prompt Builder needs the local Danbooru tag library to ground the AI's choices. It's a one-time ~500 MB download and ~5 minute index.
+            </p>
+            <a
+              href="#/settings"
+              style={{
+                display: 'inline-block',
+                background: '#e8c820',
+                color: '#0f0e0b',
+                padding: '8px 16px',
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 13,
+                textDecoration: 'none',
+              }}
+            >
+              Go to Settings →
+            </a>
+          </div>
         </div>
+      ) : (
+        <>
+          {!apiKeySet && (
+            <div style={{ flexShrink: 0, padding: '10px 18px', background: 'rgba(232, 200, 32, 0.08)', borderBottom: '1px solid rgba(232, 200, 32, 0.3)' }}>
+              <p style={{ fontSize: 12, color: '#e8c820' }}>
+                ⚠ No DeepSeek API key set. <a href="#/settings" style={{ color: '#e8c820', textDecoration: 'underline' }}>Add one in Settings</a> to start generating prompts.
+              </p>
+            </div>
+          )}
 
-        <div className="flex flex-col flex-1 min-w-0" style={{ background: '#0f0e0b' }}>
-          <ChatTranscript
-            sessionId={activeSessionId}
-            inFlight={inFlight}
-            recentToolCall={recentToolCall}
-            refreshTick={transcriptTick}
-            onSavePreset={handleSavePreset}
-          />
-          <InputDock
-            selectedLoras={selectedLorasArray}
-            onRemoveLora={removeLora}
-            onSend={handleSend}
-            inFlight={inFlight}
-            defaultTemp={defaultTemp}
-            insertTagRef={insertTagRef}
-          />
-        </div>
+          <div className="flex flex-1 min-h-0">
+            <div className="flex-shrink-0" style={{ width: '220px', background: '#0f0e0b', borderRight: '1px solid #302c1e' }}>
+              <TagLibraryPanel onInsertTag={handleInsertTag} />
+            </div>
 
-        <div className="flex-shrink-0" style={{ width: '270px', background: '#0f0e0b', borderLeft: '1px solid #302c1e' }}>
-          <LoRAPicker
-            selectedIds={selectedLoraIds}
-            onToggle={toggleLora}
-          />
-        </div>
-      </div>
+            <div className="flex flex-col flex-1 min-w-0" style={{ background: '#0f0e0b' }}>
+              <ChatTranscript
+                sessionId={activeSessionId}
+                inFlight={inFlight}
+                recentToolCall={recentToolCall}
+                refreshTick={transcriptTick}
+                onSavePreset={handleSavePreset}
+              />
+              <InputDock
+                selectedLoras={selectedLorasArray}
+                onRemoveLora={removeLora}
+                onSend={handleSend}
+                inFlight={inFlight}
+                defaultTemp={defaultTemp}
+                insertTagRef={insertTagRef}
+              />
+            </div>
+
+            <div className="flex-shrink-0" style={{ width: '270px', background: '#0f0e0b', borderLeft: '1px solid #302c1e' }}>
+              <LoRAPicker
+                selectedIds={selectedLoraIds}
+                onToggle={toggleLora}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
