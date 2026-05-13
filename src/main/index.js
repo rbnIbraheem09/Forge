@@ -10,6 +10,7 @@ const { registerModelsHandlers } = require('./ipc/models')
 const { registerDashboardHandlers } = require('./ipc/dashboard')
 const { registerSearchHandlers } = require('./ipc/search')
 const { registerPromptLibraryHandlers } = require('./ipc/prompt-library')
+const { registerPromptChatHandlers } = require('./ipc/prompt-chat')
 const { startOutputScanner, stopOutputScanner } = require('./scanner/output-scanner')
 const { scanLorasFolder, scanCheckpointsFolder } = require('./scanner/folder-scanner')
 const { getDatabase } = require('./db/database')
@@ -55,6 +56,7 @@ app.whenReady().then(() => {
   registerDashboardHandlers()
   registerSearchHandlers()
   registerPromptLibraryHandlers()
+  registerPromptChatHandlers()
 
   createWindow()
 

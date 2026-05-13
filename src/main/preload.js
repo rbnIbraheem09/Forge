@@ -82,12 +82,22 @@ contextBridge.exposeInMainWorld('forge', {
     setApiKey: (plaintext) => ipcRenderer.invoke('settings:setApiKey', { key: 'deepseek_api_key', plaintext }),
     hasApiKey: () => ipcRenderer.invoke('settings:hasApiKey', { key: 'deepseek_api_key' }),
     testApiKey: () => ipcRenderer.invoke('settings:testApiKey', { key: 'deepseek_api_key', baseUrl: 'https://api.deepseek.com/v1' }),
+    send: (args) => ipcRenderer.invoke('prompt:send', args),
+    sessions: {
+      list: () => ipcRenderer.invoke('prompt:sessions:list'),
+      new: (args) => ipcRenderer.invoke('prompt:sessions:new', args || {}),
+      delete: (id) => ipcRenderer.invoke('prompt:sessions:delete', { id }),
+      rename: (id, title) => ipcRenderer.invoke('prompt:sessions:rename', { id, title }),
+    },
+    messages: {
+      list: (sessionId) => ipcRenderer.invoke('prompt:messages:list', { sessionId }),
+    },
   },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),
   },
   on: (channel, callback) => {
-    const allowed = ['inbox:new-item', 'prompt:library-progress']
+    const allowed = ['inbox:new-item', 'prompt:library-progress', 'prompt:tool-call']
     if (!allowed.includes(channel)) return
     const wrapper = (_e, ...args) => callback(...args)
     // Track the wrapper per (channel, callback) pair so off() can remove the right one.
