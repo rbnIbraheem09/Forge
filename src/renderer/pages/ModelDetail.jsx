@@ -104,95 +104,96 @@ export default function ModelDetail() {
         </div>
       </div>
 
-      {/* Examples */}
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
-        <ExamplesGrid
-          images={model.example_images || []}
-          entityKind="checkpoint"
-          entityId={modelId}
-          entityName={model.name}
-          onChanged={load}
-        />
-      </div>
+      {/* Two-column body */}
+      <div className="mb-6 grid gap-6 detail-split" style={{ gridTemplateColumns: 'minmax(0,1.4fr) minmax(0,1fr)' }}>
+        <div>
+          <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
+          <ExamplesGrid
+            images={model.example_images || []}
+            entityKind="checkpoint"
+            entityId={modelId}
+            entityName={model.name}
+            onChanged={load}
+          />
+        </div>
 
-      {/* Rec CFG */}
-      <div className="mb-6 max-w-xs">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Recommended CFG (1–30)</p>
-          <div className="flex gap-2">
-            <button onClick={() => pasteNumber(setCfg, 'recommended_cfg', 1, 30, false)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
-            <button onClick={() => copyValue(cfg)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+        <div className="flex flex-col gap-5">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Recommended CFG (1–30)</p>
+              <div className="flex gap-2">
+                <button onClick={() => pasteNumber(setCfg, 'recommended_cfg', 1, 30, false)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
+                <button onClick={() => copyValue(cfg)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+              </div>
+            </div>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={cfg}
+              onChange={handleCfgChange}
+              onFocus={() => setFocused('cfg')}
+              onBlur={() => setFocused(null)}
+              placeholder="e.g. 7"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
+              style={{
+                background: '#1a1813',
+                border: focused === 'cfg' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#7aa0e8',
+              }}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Recommended steps (1–150)</p>
+              <div className="flex gap-2">
+                <button onClick={() => pasteNumber(setSteps, 'recommended_steps', 1, 150, true)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
+                <button onClick={() => copyValue(steps)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+              </div>
+            </div>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={steps}
+              onChange={handleStepsChange}
+              onFocus={() => setFocused('steps')}
+              onBlur={() => setFocused(null)}
+              placeholder="e.g. 30"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
+              style={{
+                background: '#1a1813',
+                border: focused === 'steps' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#7aa0e8',
+              }}
+            />
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Notes</p>
+            <textarea
+              value={notes}
+              onChange={handleNotesChange}
+              onFocus={() => setFocused('notes')}
+              onBlur={() => setFocused(null)}
+              placeholder="Your notes on this checkpoint…"
+              rows={5}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
+              style={{
+                background: '#1a1813',
+                border: focused === 'notes' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#eae5dc',
+              }}
+            />
           </div>
         </div>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={cfg}
-          onChange={handleCfgChange}
-          onFocus={() => setFocused('cfg')}
-          onBlur={() => setFocused(null)}
-          placeholder="e.g. 7"
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
-          style={{
-            background: '#1a1813',
-            border: focused === 'cfg' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#7aa0e8',
-          }}
-        />
-      </div>
-
-      {/* Rec steps */}
-      <div className="mb-6 max-w-xs">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Recommended steps (1–150)</p>
-          <div className="flex gap-2">
-            <button onClick={() => pasteNumber(setSteps, 'recommended_steps', 1, 150, true)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
-            <button onClick={() => copyValue(steps)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
-          </div>
-        </div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={steps}
-          onChange={handleStepsChange}
-          onFocus={() => setFocused('steps')}
-          onBlur={() => setFocused(null)}
-          placeholder="e.g. 30"
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
-          style={{
-            background: '#1a1813',
-            border: focused === 'steps' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#7aa0e8',
-          }}
-        />
-      </div>
-
-      {/* Notes */}
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Notes</p>
-        <textarea
-          value={notes}
-          onChange={handleNotesChange}
-          onFocus={() => setFocused('notes')}
-          onBlur={() => setFocused(null)}
-          placeholder="Your notes on this checkpoint…"
-          rows={5}
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
-          style={{
-            background: '#1a1813',
-            border: focused === 'notes' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#eae5dc',
-          }}
-        />
       </div>
 
       {/* Usage gallery — unchanged */}
@@ -223,6 +224,11 @@ export default function ModelDetail() {
           </div>
         )}
       </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .detail-split { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   )
 }

@@ -118,94 +118,97 @@ export default function LoRADetail() {
         </div>
       </div>
 
-      {/* Examples */}
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
-        <ExamplesGrid
-          images={lora.example_images || []}
-          entityKind="lora"
-          entityId={loraId}
-          entityName={lora.name}
-          onChanged={load}
-        />
-      </div>
+      {/* Two-column body: examples left ~60%, fields stacked right */}
+      <div className="mb-6 grid gap-6 detail-split" style={{ gridTemplateColumns: 'minmax(0,1.4fr) minmax(0,1fr)' }}>
+        {/* Left column: examples */}
+        <div>
+          <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
+          <ExamplesGrid
+            images={lora.example_images || []}
+            entityKind="lora"
+            entityId={loraId}
+            entityName={lora.name}
+            onChanged={load}
+          />
+        </div>
 
-      {/* Trigger words */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Trigger words</p>
-          <div className="flex gap-2">
-            <button onClick={() => pasteInto(setTriggerWords, 'trigger_words', 'text')}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
-            <button onClick={() => copyValue(triggerWords)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+        {/* Right column: trigger words / strength / notes */}
+        <div className="flex flex-col gap-5">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Trigger words</p>
+              <div className="flex gap-2">
+                <button onClick={() => pasteInto(setTriggerWords, 'trigger_words', 'text')}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
+                <button onClick={() => copyValue(triggerWords)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+              </div>
+            </div>
+            <textarea
+              value={triggerWords}
+              onChange={handleTriggerChange}
+              onFocus={() => setFocused('trigger')}
+              onBlur={() => setFocused(null)}
+              placeholder="Activation tokens / sample prompts…"
+              rows={3}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
+              style={{
+                background: '#1a1813',
+                border: focused === 'trigger' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#eae5dc',
+              }}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Strength (0–2)</p>
+              <div className="flex gap-2">
+                <button onClick={() => pasteInto(setStrength, 'recommended_strength', 'number')}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
+                <button onClick={() => copyValue(strength)}
+                  className="text-[10px] px-2 py-0.5 rounded border"
+                  style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
+              </div>
+            </div>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={strength}
+              onChange={handleStrengthChange}
+              onFocus={() => setFocused('strength')}
+              onBlur={() => setFocused(null)}
+              placeholder="e.g. 0.85"
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
+              style={{
+                background: '#1a1813',
+                border: focused === 'strength' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#e8c820',
+              }}
+            />
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Notes</p>
+            <textarea
+              value={notes}
+              onChange={handleNotesChange}
+              onFocus={() => setFocused('notes')}
+              onBlur={() => setFocused(null)}
+              placeholder="Your notes on this LoRA…"
+              rows={5}
+              className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
+              style={{
+                background: '#1a1813',
+                border: focused === 'notes' ? '1px solid #635c48' : '1px solid transparent',
+                color: '#eae5dc',
+              }}
+            />
           </div>
         </div>
-        <textarea
-          value={triggerWords}
-          onChange={handleTriggerChange}
-          onFocus={() => setFocused('trigger')}
-          onBlur={() => setFocused(null)}
-          placeholder="Activation tokens / sample prompts, comma-separated or freeform…"
-          rows={4}
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
-          style={{
-            background: '#1a1813',
-            border: focused === 'trigger' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#eae5dc',
-          }}
-        />
-      </div>
-
-      {/* Strength */}
-      <div className="mb-6 max-w-xs">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Strength (0–2)</p>
-          <div className="flex gap-2">
-            <button onClick={() => pasteInto(setStrength, 'recommended_strength', 'number')}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>📋 Paste</button>
-            <button onClick={() => copyValue(strength)}
-              className="text-[10px] px-2 py-0.5 rounded border"
-              style={{ borderColor: '#302c1e', color: '#635c48' }}>Copy</button>
-          </div>
-        </div>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={strength}
-          onChange={handleStrengthChange}
-          onFocus={() => setFocused('strength')}
-          onBlur={() => setFocused(null)}
-          placeholder="e.g. 0.85"
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors font-mono"
-          style={{
-            background: '#1a1813',
-            border: focused === 'strength' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#e8c820',
-          }}
-        />
-      </div>
-
-      {/* Notes — unchanged shape, just uses new queueSave */}
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Notes</p>
-        <textarea
-          value={notes}
-          onChange={handleNotesChange}
-          onFocus={() => setFocused('notes')}
-          onBlur={() => setFocused(null)}
-          placeholder="Your notes on this LoRA — strengths, weaknesses, best pairings…"
-          rows={5}
-          className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
-          style={{
-            background: '#1a1813',
-            border: focused === 'notes' ? '1px solid #635c48' : '1px solid transparent',
-            color: '#eae5dc',
-          }}
-        />
       </div>
 
       {/* Usage gallery — unchanged */}
@@ -237,6 +240,11 @@ export default function LoRADetail() {
           </div>
         )}
       </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .detail-split { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   )
 }
