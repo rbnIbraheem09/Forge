@@ -251,7 +251,7 @@ export default function Settings() {
                   <span style={{ color: '#7daa88' }}>indexed</span>
                 ) : (
                   <span style={{ color: '#e8c820' }}>
-                    {libStatus.indexed_count.toLocaleString()} / {libStatus.count.toLocaleString()} indexed
+                    {(libStatus.indexed_count ?? 0).toLocaleString()} / {libStatus.count.toLocaleString()} indexed
                   </span>
                 )}
                 {libStatus.version && ' · last refreshed ' + new Date(libStatus.version).toLocaleDateString()}
