@@ -1,5 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
+// Tracks user-callback → per-channel wrapper, so off() can remove the wrapper we registered.
+const wrapperMap = new WeakMap()
+
 contextBridge.exposeInMainWorld('forge', {
   settings: {
     get: (key) => ipcRenderer.invoke('settings:get', key),
@@ -82,11 +85,21 @@ contextBridge.exposeInMainWorld('forge', {
   },
   on: (channel, callback) => {
     const allowed = ['inbox:new-item', 'prompt:library-progress']
-    if (allowed.includes(channel)) {
-      ipcRenderer.on(channel, (_e, ...args) => callback(...args))
-    }
+    if (!allowed.includes(channel)) return
+    const wrapper = (_e, ...args) => callback(...args)
+    // Track the wrapper per (channel, callback) pair so off() can remove the right one.
+    let perChannel = wrapperMap.get(callback)
+    if (!perChannel) { perChannel = new Map(); wrapperMap.set(callback, perChannel) }
+    perChannel.set(channel, wrapper)
+    ipcRenderer.on(channel, wrapper)
   },
   off: (channel, callback) => {
-    ipcRenderer.removeListener(channel, callback)
+    const perChannel = wrapperMap.get(callback)
+    const wrapper = perChannel && perChannel.get(channel)
+    if (wrapper) {
+      ipcRenderer.removeListener(channel, wrapper)
+      perChannel.delete(channel)
+      if (perChannel.size === 0) wrapperMap.delete(callback)
+    }
   },
 })
