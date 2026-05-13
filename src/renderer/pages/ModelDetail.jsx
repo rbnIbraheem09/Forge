@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
 import { useImageViewer } from '../context/ImageViewerContext.jsx'
 import ExamplesGrid from '../components/ExamplesGrid.jsx'
+import { MODEL_FAMILIES } from '../lib/model-families.js'
 
 export default function ModelDetail() {
   const { id } = useParams()
@@ -14,6 +15,7 @@ export default function ModelDetail() {
   const [notes, setNotes] = useState('')
   const [cfg, setCfg] = useState('')
   const [steps, setSteps] = useState('')
+  const [family, setFamily] = useState('')
   const [focused, setFocused] = useState(null)
   const showToast = useToast()
   const navigate = useNavigate()
@@ -29,6 +31,7 @@ export default function ModelDetail() {
     setNotes(m.notes || '')
     setCfg(m.recommended_cfg != null ? String(m.recommended_cfg) : '')
     setSteps(m.recommended_steps != null ? String(m.recommended_steps) : '')
+    setFamily(m.family || '')
   }, [modelId])
 
   useEffect(() => { load() }, [load])
@@ -43,6 +46,16 @@ export default function ModelDetail() {
       await window.forge.models.update(payload)
       showToast('Saved.')
     }, 500)
+  }
+
+  const handleFamilyChange = async (e) => {
+    const value = e.target.value
+    setFamily(value)
+    await window.forge.models.update({
+      id: modelId,
+      family: value === '' ? null : value,
+    })
+    showToast('Saved.')
   }
 
   const handleNotesChange = (e) => { setNotes(e.target.value); queueSave('notes', e.target.value) }
@@ -120,6 +133,41 @@ export default function ModelDetail() {
         </div>
 
         <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Model family</p>
+            <div className="relative">
+              <select
+                value={family}
+                onChange={handleFamilyChange}
+                onFocus={() => setFocused('family')}
+                onBlur={() => setFocused(null)}
+                className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-colors appearance-none cursor-pointer"
+                style={{
+                  background: '#1a1813',
+                  border: focused === 'family' ? '1px solid #635c48' : '1px solid transparent',
+                  color: family ? '#eae5dc' : '#635c48',
+                  fontFamily: 'Figtree, sans-serif',
+                }}
+              >
+                <option value="" style={{ background: '#1a1813', color: '#635c48' }}>Not classified — pick one</option>
+                {MODEL_FAMILIES.map(f => (
+                  <option key={f.value} value={f.value} style={{ background: '#1a1813', color: '#eae5dc' }}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+              <span
+                className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-xs"
+                style={{ color: '#635c48' }}
+              >
+                ▾
+              </span>
+            </div>
+            <p className="text-[10px] mt-1.5" style={{ color: '#635c48' }}>
+              Used by the Prompt Builder to pick the right quality / negative tags for this checkpoint.
+            </p>
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs uppercase tracking-wider" style={{ color: '#635c48' }}>Recommended CFG (1–30)</p>
