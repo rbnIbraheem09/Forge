@@ -28,7 +28,11 @@ async function importCsv(csvPath, onProgress = () => {}) {
       try {
         insert.run(r.name, r.category, r.post_count, r.aliases)
       } catch (err) {
-        // Likely a UNIQUE constraint failure on duplicate names within the CSV — skip.
+        // The CSV may contain duplicate names; UNIQUE collisions are expected and silent.
+        // Any other error indicates a real problem worth surfacing.
+        if (err.code !== 'SQLITE_CONSTRAINT_UNIQUE') {
+          console.warn('[indexer] unexpected insert error for tag', JSON.stringify(r.name), ':', err.message)
+        }
       }
     }
   })
