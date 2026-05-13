@@ -33,9 +33,21 @@ function registerModelsHandlers() {
     `).get(id)
   })
 
-  ipcMain.handle('models:update', (_e, { id, notes }) => {
+  ipcMain.handle('models:update', (_e, { id, notes, recommended_cfg, recommended_steps }) => {
     const db = getDatabase()
-    db.prepare('UPDATE models SET notes = ? WHERE id = ?').run(notes, id)
+    const fields = []
+    const values = []
+    if (notes !== undefined) { fields.push('notes = ?'); values.push(notes) }
+    if (recommended_cfg !== undefined) {
+      const clamped = recommended_cfg === null ? null : Math.min(30, Math.max(1, Number(recommended_cfg)))
+      fields.push('recommended_cfg = ?'); values.push(clamped)
+    }
+    if (recommended_steps !== undefined) {
+      const clamped = recommended_steps === null ? null : Math.min(150, Math.max(1, Math.round(Number(recommended_steps))))
+      fields.push('recommended_steps = ?'); values.push(clamped)
+    }
+    if (fields.length === 0) return true
+    db.prepare(`UPDATE models SET ${fields.join(', ')} WHERE id = ?`).run(...values, id)
     return true
   })
 
@@ -57,6 +69,18 @@ function registerModelsHandlers() {
       'INSERT INTO models (name, file_path, notes) VALUES (?, ?, ?)'
     ).run(name.trim(), file_path || null, notes || null)
     return db.prepare('SELECT * FROM models WHERE id = ?').get(result.lastInsertRowid)
+  })
+
+  ipcMain.handle('models:merge', (_e, { keepId, deleteIds }) => {
+    const db = getDatabase()
+    return db.transaction(() => {
+      for (const deleteId of deleteIds) {
+        db.prepare('UPDATE iterations SET checkpoint_id = ? WHERE checkpoint_id = ?')
+          .run(keepId, deleteId)
+        db.prepare('DELETE FROM models WHERE id = ?').run(deleteId)
+      }
+      return true
+    })()
   })
 }
 

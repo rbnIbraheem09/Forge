@@ -37,12 +37,17 @@ function registerLorasHandlers() {
     return lora
   })
 
-  ipcMain.handle('loras:update', (_e, { id, notes, default_weight }) => {
+  ipcMain.handle('loras:update', (_e, { id, notes, default_weight, trigger_words, recommended_strength }) => {
     const db = getDatabase()
     const fields = []
     const values = []
     if (notes !== undefined) { fields.push('notes = ?'); values.push(notes) }
     if (default_weight !== undefined) { fields.push('default_weight = ?'); values.push(default_weight) }
+    if (trigger_words !== undefined) { fields.push('trigger_words = ?'); values.push(trigger_words) }
+    if (recommended_strength !== undefined) {
+      const clamped = recommended_strength === null ? null : Math.min(2, Math.max(0, Number(recommended_strength)))
+      fields.push('recommended_strength = ?'); values.push(clamped)
+    }
     if (fields.length === 0) return true
     db.prepare(`UPDATE loras SET ${fields.join(', ')} WHERE id = ?`).run(...values, id)
     return true
@@ -72,6 +77,30 @@ function registerLorasHandlers() {
       'INSERT INTO loras (name, file_path, notes, default_weight) VALUES (?, ?, ?, ?)'
     ).run(name.trim(), file_path || null, notes || null, default_weight || 1.0)
     return db.prepare('SELECT * FROM loras WHERE id = ?').get(result.lastInsertRowid)
+  })
+
+  ipcMain.handle('loras:merge', (_e, { keepId, deleteIds }) => {
+    const db = getDatabase()
+    return db.transaction(() => {
+      for (const deleteId of deleteIds) {
+        // Reassign iteration_loras, skipping any that would conflict on the primary key
+        const rows = db.prepare('SELECT iteration_id, weight FROM iteration_loras WHERE lora_id = ?').all(deleteId)
+        for (const row of rows) {
+          const conflict = db.prepare(
+            'SELECT 1 FROM iteration_loras WHERE iteration_id = ? AND lora_id = ?'
+          ).get(row.iteration_id, keepId)
+          if (!conflict) {
+            db.prepare('UPDATE iteration_loras SET lora_id = ? WHERE iteration_id = ? AND lora_id = ?')
+              .run(keepId, row.iteration_id, deleteId)
+          } else {
+            db.prepare('DELETE FROM iteration_loras WHERE iteration_id = ? AND lora_id = ?')
+              .run(row.iteration_id, deleteId)
+          }
+        }
+        db.prepare('DELETE FROM loras WHERE id = ?').run(deleteId)
+      }
+      return true
+    })()
   })
 }
 

@@ -27,7 +27,32 @@ function getDatabase() {
 
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8')
   db.exec(schema)
-  db.pragma('user_version = 2')
+
+  if (version < 3) {
+    // Add file_mtime to existing inbox_items tables; fails silently on fresh installs
+    // where the column already exists from the schema above
+    try { db.exec('ALTER TABLE inbox_items ADD COLUMN file_mtime TEXT') } catch {}
+
+    // Backfill mtime for any existing rows that have NULL
+    const rows = db.prepare('SELECT id, image_path FROM inbox_items WHERE file_mtime IS NULL').all()
+    const update = db.prepare('UPDATE inbox_items SET file_mtime = ? WHERE id = ?')
+    for (const row of rows) {
+      try {
+        const mtime = fs.statSync(row.image_path).mtime.toISOString()
+        update.run(mtime, row.id)
+      } catch {}
+    }
+  }
+
+  if (version < 4) {
+    // Tables lora_example_images / model_example_images are created idempotently by schema.sql above — no version-guarded CREATE needed here.
+    try { db.exec('ALTER TABLE loras  ADD COLUMN trigger_words TEXT') } catch {}
+    try { db.exec('ALTER TABLE loras  ADD COLUMN recommended_strength REAL') } catch {}
+    try { db.exec('ALTER TABLE models ADD COLUMN recommended_cfg REAL') } catch {}
+    try { db.exec('ALTER TABLE models ADD COLUMN recommended_steps INTEGER') } catch {}
+  }
+
+  db.pragma('user_version = 4')
 
   return db
 }

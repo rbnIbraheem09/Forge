@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS models (
   description TEXT,
   notes TEXT,
   status TEXT DEFAULT 'online',
+  recommended_cfg REAL,
+  recommended_steps INTEGER,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -16,6 +18,8 @@ CREATE TABLE IF NOT EXISTS loras (
   notes TEXT,
   default_weight REAL DEFAULT 1.0,
   status TEXT DEFAULT 'online',
+  trigger_words TEXT,
+  recommended_strength REAL,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -78,6 +82,7 @@ CREATE TABLE IF NOT EXISTS inbox_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   image_path TEXT NOT NULL UNIQUE,
   extracted_metadata TEXT,
+  file_mtime TEXT,
   detected_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -92,4 +97,22 @@ CREATE TABLE IF NOT EXISTS extras (
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT
+);
+
+CREATE TABLE IF NOT EXISTS lora_example_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lora_id INTEGER NOT NULL REFERENCES loras(id) ON DELETE CASCADE,
+  image_path TEXT NOT NULL,
+  source TEXT NOT NULL CHECK (source IN ('paste','file','gallery')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS model_example_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  model_id INTEGER NOT NULL REFERENCES models(id) ON DELETE CASCADE,
+  image_path TEXT NOT NULL,
+  source TEXT NOT NULL CHECK (source IN ('paste','file','gallery')),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
