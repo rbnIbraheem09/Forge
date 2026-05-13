@@ -52,7 +52,11 @@ function getDatabase() {
     try { db.exec('ALTER TABLE models ADD COLUMN recommended_steps INTEGER') } catch {}
   }
 
-  db.pragma('user_version = 4')
+  if (version < 5) {
+    try { db.exec('ALTER TABLE models ADD COLUMN family TEXT') } catch {}
+  }
+
+  db.pragma('user_version = 5')
 
   return db
 }

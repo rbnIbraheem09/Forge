@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS models (
   status TEXT DEFAULT 'online',
   recommended_cfg REAL,
   recommended_steps INTEGER,
+  family TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
