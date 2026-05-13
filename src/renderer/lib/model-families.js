@@ -2,7 +2,7 @@
 //
 // Source of truth for checkpoint model families used by the Prompt Builder
 // to tailor AI-generated prompts. Stored values are snake_case strings;
-// keep these in sync with src/main/ipc/models.js MODEL_FAMILIES.
+// keep these in sync with src/main/ipc/models.js MODEL_FAMILY_VALUES.
 
 export const MODEL_FAMILIES = [
   { value: 'pony_xl',        label: 'Pony Diffusion XL' },
