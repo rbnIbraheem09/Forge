@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
+import { familyLabel } from '../lib/model-families.js'
 
 export default function ModelsList() {
   const [models, setModels] = useState([])
@@ -82,10 +83,27 @@ export default function ModelsList() {
               transition={{ duration: 0.12 }}
             >
               <div className="flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium" style={{ color: '#eae5dc' }}>{m.name}</span>
                   {m.status === 'offline' && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: '#242118', color: '#635c48' }}>Offline</span>
+                  )}
+                  {m.family ? (
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ background: 'rgba(125, 170, 136, 0.14)', color: '#7daa88' }}
+                      title="Model family"
+                    >
+                      {familyLabel(m.family)}
+                    </span>
+                  ) : (
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                      style={{ background: 'rgba(232, 200, 32, 0.14)', color: '#e8c820' }}
+                      title="Needs classification — set a model family on the detail page"
+                    >
+                      ?
+                    </span>
                   )}
                 </div>
               </div>
