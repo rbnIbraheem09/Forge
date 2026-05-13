@@ -9,9 +9,14 @@ export default function ExamplesGrid({ images, entityKind, entityId, entityName,
   const [menuOpen, setMenuOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [lightboxPath, setLightboxPath] = useState(null)
+  const [deletingIds, setDeletingIds] = useState(() => new Set())
   const showToast = useToast()
   const max = 4
   const namespace = entityKind === 'lora' ? 'loras' : 'models'
+
+  // Optimistically hide tiles being deleted so AnimatePresence can play the
+  // exit animation before the parent's onChanged() refetch lands.
+  const visibleImages = images.filter(img => !deletingIds.has(img.id))
 
   const addPaste = async () => {
     try {
@@ -53,11 +58,21 @@ export default function ExamplesGrid({ images, entityKind, entityId, entityName,
 
   const remove = async (exampleId, e) => {
     e.stopPropagation()
+    setDeletingIds(prev => {
+      const next = new Set(prev)
+      next.add(exampleId)
+      return next
+    })
     try {
       await window.forge[namespace].removeExampleImage(exampleId)
       onChanged()
     } catch {
       showToast("Couldn't remove.")
+      setDeletingIds(prev => {
+        const next = new Set(prev)
+        next.delete(exampleId)
+        return next
+      })
     }
   }
 
@@ -81,36 +96,36 @@ export default function ExamplesGrid({ images, entityKind, entityId, entityName,
     </motion.div>
   )
 
-  const count = images.length
+  const count = visibleImages.length
 
   return (
     <div className="relative">
       <AnimatePresence>
         {count === 1 && (
           <div className="grid gap-3" style={{ gridTemplateColumns: '1fr' }}>
-            {renderTile(images[0], { aspectRatio: '16 / 10' })}
+            {renderTile(visibleImages[0], { aspectRatio: '16 / 10' })}
           </div>
         )}
 
         {count === 2 && (
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {images.map(img => renderTile(img, { aspectRatio: '1' }))}
+            {visibleImages.map(img => renderTile(img, { aspectRatio: '1' }))}
           </div>
         )}
 
         {count === 3 && (
           <div className="flex flex-col gap-3">
-            {renderTile(images[0], { aspectRatio: '2 / 1' })}
+            {renderTile(visibleImages[0], { aspectRatio: '2 / 1' })}
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-              {renderTile(images[1], { aspectRatio: '1' })}
-              {renderTile(images[2], { aspectRatio: '1' })}
+              {renderTile(visibleImages[1], { aspectRatio: '1' })}
+              {renderTile(visibleImages[2], { aspectRatio: '1' })}
             </div>
           </div>
         )}
 
         {count === 4 && (
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {images.map(img => renderTile(img, { aspectRatio: '1' }))}
+            {visibleImages.map(img => renderTile(img, { aspectRatio: '1' }))}
           </div>
         )}
       </AnimatePresence>
