@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { icon: '🗂',  label: 'Main Gens', to: '/main-gens' },
   { icon: '🎛',  label: 'LoRAs',     to: '/loras' },
   { icon: '🧱',  label: 'Checkpoints', to: '/models' },
-  { icon: '📝',  label: 'Extras',    to: '/extras' },
+  { icon: '✨',  label: 'Prompt',    to: '/prompt' },
 ]
 
 function NavItem({ icon, label, to, end, badge, isActive }) {

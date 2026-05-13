@@ -10,7 +10,7 @@ import LoRAsList from './pages/LoRAsList.jsx'
 import LoRADetail from './pages/LoRADetail.jsx'
 import ModelsList from './pages/ModelsList.jsx'
 import ModelDetail from './pages/ModelDetail.jsx'
-import Extras from './pages/Extras.jsx'
+import PromptBuilder from './pages/PromptBuilder.jsx'
 import Settings from './pages/Settings.jsx'
 import SearchOverlay from './components/SearchOverlay.jsx'
 import OnboardingModal from './pages/OnboardingModal.jsx'
@@ -77,7 +77,7 @@ export default function App() {
                   <Route path="/loras/:id" element={<LoRADetail />} />
                   <Route path="/models" element={<ModelsList />} />
                   <Route path="/models/:id" element={<ModelDetail />} />
-                  <Route path="/extras" element={<Extras />} />
+                  <Route path="/prompt" element={<PromptBuilder />} />
                   <Route path="/settings" element={<Settings />} />
                 </Routes>
               </main>
