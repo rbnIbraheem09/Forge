@@ -78,7 +78,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="flex flex-col flex-shrink-0 h-full pt-8 pb-4 px-3"
+      className="flex flex-col flex-shrink-0 h-full pt-4 pb-4 px-3"
       style={{ width: '200px', background: '#0f0e0b', borderRight: '1px solid #302c1e' }}
     >
       {/* Wordmark */}

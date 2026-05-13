@@ -61,22 +61,27 @@ export default function App() {
       <ToastProvider>
         <InboxProvider>
          <ImageViewerProvider>
-          <div className="flex h-screen w-screen overflow-hidden" style={{ background: '#0e0e0f' }}>
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/inbox" element={<Inbox />} />
-                <Route path="/main-gens" element={<MainGensList />} />
-                <Route path="/main-gens/:id" element={<MainGenDetail />} />
-                <Route path="/loras" element={<LoRAsList />} />
-                <Route path="/loras/:id" element={<LoRADetail />} />
-                <Route path="/models" element={<ModelsList />} />
-                <Route path="/models/:id" element={<ModelDetail />} />
-                <Route path="/extras" element={<Extras />} />
-                <Route path="/settings" element={<Settings />} />
-              </Routes>
-            </main>
+          <div className="flex flex-col h-screen w-screen overflow-hidden" style={{ background: '#0e0e0f' }}>
+            {/* Invisible drag region — grab anywhere here to move the window.
+                Sits behind the traffic lights (system UI; still clickable). */}
+            <div style={{ height: 28, flexShrink: 0, WebkitAppRegion: 'drag' }} />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <main className="flex-1 overflow-y-auto">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/inbox" element={<Inbox />} />
+                  <Route path="/main-gens" element={<MainGensList />} />
+                  <Route path="/main-gens/:id" element={<MainGenDetail />} />
+                  <Route path="/loras" element={<LoRAsList />} />
+                  <Route path="/loras/:id" element={<LoRADetail />} />
+                  <Route path="/models" element={<ModelsList />} />
+                  <Route path="/models/:id" element={<ModelDetail />} />
+                  <Route path="/extras" element={<Extras />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </main>
+            </div>
             <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
             {onboarding && (
               <OnboardingModal
