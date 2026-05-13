@@ -12,6 +12,9 @@ async function getPipeline() {
     const { pipeline } = await import('@huggingface/transformers')
     return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { quantized: true })
   })()
+  // If the load fails, reset the cache so the next call retries instead of returning a
+  // permanently-rejected promise.
+  pipelinePromise.catch(() => { pipelinePromise = null })
   return pipelinePromise
 }
 
