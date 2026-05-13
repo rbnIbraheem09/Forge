@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
+import ExamplesGrid from '../components/ExamplesGrid.jsx'
 
 export default function ModelDetail() {
   const { id } = useParams()
@@ -101,6 +102,18 @@ export default function ModelDetail() {
             <div className="text-[11px] uppercase tracking-wider mt-0.5" style={{ color: '#635c48' }}>Main Gens</div>
           </div>
         </div>
+      </div>
+
+      {/* Examples */}
+      <div className="mb-6">
+        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
+        <ExamplesGrid
+          images={model.example_images || []}
+          entityKind="checkpoint"
+          entityId={modelId}
+          entityName={model.name}
+          onChanged={load}
+        />
       </div>
 
       {/* Rec CFG */}

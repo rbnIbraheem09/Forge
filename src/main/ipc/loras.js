@@ -1,7 +1,8 @@
 // src/main/ipc/loras.js
-const { ipcMain } = require('electron')
+const { ipcMain, dialog, BrowserWindow } = require('electron')
 const { getDatabase } = require('../db/database')
 const { scanLorasFolder } = require('../scanner/folder-scanner')
+const { saveBufferAsExample, copyFileAsExample, unlinkExample } = require('../examples/example-images')
 
 function registerLorasHandlers() {
   ipcMain.handle('loras:scan', () => {
@@ -34,6 +35,13 @@ function registerLorasHandlers() {
       WHERE l.id = ?
       GROUP BY l.id
     `).get(id)
+    if (!lora) return null
+    lora.example_images = db.prepare(`
+      SELECT id, image_path, source, sort_order
+      FROM lora_example_images
+      WHERE lora_id = ?
+      ORDER BY sort_order ASC, id ASC
+    `).all(id)
     return lora
   })
 
@@ -101,6 +109,64 @@ function registerLorasHandlers() {
       }
       return true
     })()
+  })
+
+  ipcMain.handle('loras:add-example-image', (_e, payload) => {
+    const db = getDatabase()
+    const { source, entityId } = payload
+    let imagePath
+    let madeManagedFile = false
+
+    if (source === 'paste') {
+      const buf = Buffer.from(payload.pngBuffer)
+      imagePath = saveBufferAsExample('loras', entityId, buf, '.png')
+      madeManagedFile = true
+    } else if (source === 'file') {
+      imagePath = copyFileAsExample('loras', entityId, payload.sourcePath)
+      madeManagedFile = true
+    } else if (source === 'gallery') {
+      const iter = db.prepare('SELECT image_path FROM iterations WHERE id = ?').get(payload.iterationId)
+      if (!iter) throw new Error('iteration not found')
+      imagePath = iter.image_path
+    } else {
+      throw new Error('unknown source: ' + source)
+    }
+
+    try {
+      return db.transaction(() => {
+        const maxRow = db.prepare(
+          'SELECT COALESCE(MAX(sort_order), -1) as max FROM lora_example_images WHERE lora_id = ?'
+        ).get(entityId)
+        const sortOrder = maxRow.max + 1
+        const result = db.prepare(
+          'INSERT INTO lora_example_images (lora_id, image_path, source, sort_order) VALUES (?, ?, ?, ?)'
+        ).run(entityId, imagePath, source, sortOrder)
+        return { id: result.lastInsertRowid, image_path: imagePath, source, sort_order: sortOrder }
+      })()
+    } catch (err) {
+      if (madeManagedFile) unlinkExample(imagePath)
+      throw err
+    }
+  })
+
+  ipcMain.handle('loras:remove-example-image', (_e, { exampleId }) => {
+    const db = getDatabase()
+    const row = db.prepare('SELECT image_path, source FROM lora_example_images WHERE id = ?').get(exampleId)
+    if (!row) return false
+    db.prepare('DELETE FROM lora_example_images WHERE id = ?').run(exampleId)
+    if (row.source === 'paste' || row.source === 'file') unlinkExample(row.image_path)
+    return true
+  })
+
+  ipcMain.handle('loras:pick-example-image-file', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const result = await dialog.showOpenDialog(win, {
+      title: 'Pick an example image',
+      properties: ['openFile'],
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
   })
 }
 

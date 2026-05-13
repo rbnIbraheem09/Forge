@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
+import ExamplesGrid from '../components/ExamplesGrid.jsx'
 
 export default function LoRADetail() {
   const { id } = useParams()
@@ -115,6 +116,18 @@ export default function LoRADetail() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Examples */}
+      <div className="mb-6">
+        <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Examples</p>
+        <ExamplesGrid
+          images={lora.example_images || []}
+          entityKind="lora"
+          entityId={loraId}
+          entityName={lora.name}
+          onChanged={load}
+        />
       </div>
 
       {/* Trigger words */}

@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('forge', {
   },
   iterations: {
     list: (mainGenId) => ipcRenderer.invoke('iterations:list', { mainGenId }),
+    listAll: () => ipcRenderer.invoke('iterations:list-all'),
     get: (id) => ipcRenderer.invoke('iterations:get', { id }),
     create: (args) => ipcRenderer.invoke('iterations:create', args),
     update: (args) => ipcRenderer.invoke('iterations:update', args),
@@ -42,6 +43,10 @@ contextBridge.exposeInMainWorld('forge', {
     update: (args) => ipcRenderer.invoke('loras:update', args),
     usage: (args) => ipcRenderer.invoke('loras:usage', args),
     create: (args) => ipcRenderer.invoke('loras:create', args),
+    merge: (args) => ipcRenderer.invoke('loras:merge', args),
+    addExampleImage: (args) => ipcRenderer.invoke('loras:add-example-image', args),
+    removeExampleImage: (exampleId) => ipcRenderer.invoke('loras:remove-example-image', { exampleId }),
+    pickExampleImageFile: () => ipcRenderer.invoke('loras:pick-example-image-file'),
   },
   models: {
     scan: () => ipcRenderer.invoke('models:scan'),
@@ -50,6 +55,10 @@ contextBridge.exposeInMainWorld('forge', {
     update: (args) => ipcRenderer.invoke('models:update', args),
     usage: (id) => ipcRenderer.invoke('models:usage', { id }),
     create: (args) => ipcRenderer.invoke('models:create', args),
+    merge: (args) => ipcRenderer.invoke('models:merge', args),
+    addExampleImage: (args) => ipcRenderer.invoke('models:add-example-image', args),
+    removeExampleImage: (exampleId) => ipcRenderer.invoke('models:remove-example-image', { exampleId }),
+    pickExampleImageFile: () => ipcRenderer.invoke('models:pick-example-image-file'),
   },
   dashboard: {
     stats: () => ipcRenderer.invoke('dashboard:stats'),

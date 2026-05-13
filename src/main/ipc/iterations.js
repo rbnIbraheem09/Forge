@@ -24,6 +24,17 @@ function registerIterationsHandlers() {
     return iterations
   })
 
+  ipcMain.handle('iterations:list-all', () => {
+    const db = getDatabase()
+    return db.prepare(`
+      SELECT i.id, i.image_path, i.iteration_number, i.main_gen_id,
+        mg.title as main_gen_title
+      FROM iterations i
+      JOIN main_gens mg ON mg.id = i.main_gen_id
+      ORDER BY i.created_at DESC
+    `).all()
+  })
+
   ipcMain.handle('iterations:get', (_e, { id }) => {
     const db = getDatabase()
     const iter = db.prepare(`

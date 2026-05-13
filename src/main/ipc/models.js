@@ -1,7 +1,8 @@
 // src/main/ipc/models.js
-const { ipcMain } = require('electron')
+const { ipcMain, dialog, BrowserWindow } = require('electron')
 const { getDatabase } = require('../db/database')
 const { scanCheckpointsFolder } = require('../scanner/folder-scanner')
+const { saveBufferAsExample, copyFileAsExample, unlinkExample } = require('../examples/example-images')
 
 function registerModelsHandlers() {
   ipcMain.handle('models:scan', () => {
@@ -23,7 +24,7 @@ function registerModelsHandlers() {
 
   ipcMain.handle('models:get', (_e, { id }) => {
     const db = getDatabase()
-    return db.prepare(`
+    const model = db.prepare(`
       SELECT m.*, COUNT(i.id) as usage_count,
         COUNT(DISTINCT i.main_gen_id) as main_gen_count
       FROM models m
@@ -31,6 +32,14 @@ function registerModelsHandlers() {
       WHERE m.id = ?
       GROUP BY m.id
     `).get(id)
+    if (!model) return null
+    model.example_images = db.prepare(`
+      SELECT id, image_path, source, sort_order
+      FROM model_example_images
+      WHERE model_id = ?
+      ORDER BY sort_order ASC, id ASC
+    `).all(id)
+    return model
   })
 
   ipcMain.handle('models:update', (_e, { id, notes, recommended_cfg, recommended_steps }) => {
@@ -81,6 +90,64 @@ function registerModelsHandlers() {
       }
       return true
     })()
+  })
+
+  ipcMain.handle('models:add-example-image', (_e, payload) => {
+    const db = getDatabase()
+    const { source, entityId } = payload
+    let imagePath
+    let madeManagedFile = false
+
+    if (source === 'paste') {
+      const buf = Buffer.from(payload.pngBuffer)
+      imagePath = saveBufferAsExample('models', entityId, buf, '.png')
+      madeManagedFile = true
+    } else if (source === 'file') {
+      imagePath = copyFileAsExample('models', entityId, payload.sourcePath)
+      madeManagedFile = true
+    } else if (source === 'gallery') {
+      const iter = db.prepare('SELECT image_path FROM iterations WHERE id = ?').get(payload.iterationId)
+      if (!iter) throw new Error('iteration not found')
+      imagePath = iter.image_path
+    } else {
+      throw new Error('unknown source: ' + source)
+    }
+
+    try {
+      return db.transaction(() => {
+        const maxRow = db.prepare(
+          'SELECT COALESCE(MAX(sort_order), -1) as max FROM model_example_images WHERE model_id = ?'
+        ).get(entityId)
+        const sortOrder = maxRow.max + 1
+        const result = db.prepare(
+          'INSERT INTO model_example_images (model_id, image_path, source, sort_order) VALUES (?, ?, ?, ?)'
+        ).run(entityId, imagePath, source, sortOrder)
+        return { id: result.lastInsertRowid, image_path: imagePath, source, sort_order: sortOrder }
+      })()
+    } catch (err) {
+      if (madeManagedFile) unlinkExample(imagePath)
+      throw err
+    }
+  })
+
+  ipcMain.handle('models:remove-example-image', (_e, { exampleId }) => {
+    const db = getDatabase()
+    const row = db.prepare('SELECT image_path, source FROM model_example_images WHERE id = ?').get(exampleId)
+    if (!row) return false
+    db.prepare('DELETE FROM model_example_images WHERE id = ?').run(exampleId)
+    if (row.source === 'paste' || row.source === 'file') unlinkExample(row.image_path)
+    return true
+  })
+
+  ipcMain.handle('models:pick-example-image-file', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const result = await dialog.showOpenDialog(win, {
+      title: 'Pick an example image',
+      properties: ['openFile'],
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
   })
 }
 
