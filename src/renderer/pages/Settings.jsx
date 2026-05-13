@@ -43,6 +43,9 @@ export default function Settings() {
   const [gallerySize, setGallerySize] = useState('M')
   const [autoScan, setAutoScan] = useState(true)
   const [scanning, setScanning] = useState({ loras: false, checkpoints: false })
+  const [libStatus, setLibStatus] = useState(null)
+  const [libProgress, setLibProgress] = useState(null)
+  const [libRefreshing, setLibRefreshing] = useState(false)
   const showToast = useToast()
 
   useEffect(() => {
@@ -51,6 +54,13 @@ export default function Settings() {
       if (all.gallery_size) setGallerySize(all.gallery_size)
       if (all.auto_scan !== undefined) setAutoScan(all.auto_scan !== 'false')
     })
+  }, [])
+
+  useEffect(() => {
+    window.forge.prompt.libraryStatus().then(setLibStatus).catch(() => {})
+    const handler = (payload) => setLibProgress(payload)
+    window.forge.on('prompt:library-progress', handler)
+    return () => window.forge.off('prompt:library-progress', handler)
   }, [])
 
   const handleBrowse = useCallback(async (key) => {
@@ -102,6 +112,26 @@ export default function Settings() {
     setGallerySize(size)
     await window.forge.settings.set('gallery_size', size)
     showToast(`Default gallery size set to ${size}.`)
+  }
+
+  const refreshTagLibrary = async () => {
+    setLibRefreshing(true)
+    setLibProgress(null)
+    try {
+      const result = await window.forge.prompt.libraryRefresh()
+      if (result.ok) {
+        showToast(`Tag library refreshed: ${result.inserted} tags indexed.`)
+      } else {
+        showToast(`Refresh failed: ${result.reason}`)
+      }
+      const fresh = await window.forge.prompt.libraryStatus()
+      setLibStatus(fresh)
+    } catch (err) {
+      showToast(`Refresh error: ${err.message || err}`)
+    } finally {
+      setLibRefreshing(false)
+      setLibProgress(null)
+    }
   }
 
   const toggleAutoScan = async () => {
@@ -203,6 +233,72 @@ export default function Settings() {
               />
             </button>
           </div>
+        </div>
+
+        {/* Prompt Builder — Tag Library */}
+        <div className="rounded-xl p-5 mt-4" style={{ background: '#1a1813', border: '1px solid #302c1e' }}>
+          <p className="text-sm font-medium mb-1" style={{ color: '#eae5dc' }}>Prompt Builder — Tag Library</p>
+          <p className="text-xs mb-4" style={{ color: '#bfb8a8' }}>
+            Local Danbooru tag library used by the AI prompt builder. Includes ~150k tags with semantic embeddings.
+          </p>
+
+          {libStatus && libStatus.count > 0 ? (
+            <div className="flex items-center justify-between mb-3 text-xs" style={{ color: '#bfb8a8' }}>
+              <div>
+                <span style={{ color: '#7daa88', fontWeight: 600 }}>{libStatus.count.toLocaleString()}</span>
+                {' tags · '}
+                {libStatus.indexed ? (
+                  <span style={{ color: '#7daa88' }}>indexed</span>
+                ) : (
+                  <span style={{ color: '#e8c820' }}>
+                    {libStatus.indexed_count.toLocaleString()} / {libStatus.count.toLocaleString()} indexed
+                  </span>
+                )}
+                {libStatus.version && ' · last refreshed ' + new Date(libStatus.version).toLocaleDateString()}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs mb-3" style={{ color: '#e8c820' }}>Not yet downloaded.</p>
+          )}
+
+          {libRefreshing && libProgress && (
+            <div className="mb-3">
+              <p className="text-xs mb-1" style={{ color: '#635c48' }}>
+                {libProgress.phase === 'download' && `Downloading… ${(libProgress.current / 1_000_000).toFixed(1)} MB`}
+                {libProgress.phase === 'parse' && `Parsing… ${libProgress.current.toLocaleString()} tags`}
+                {libProgress.phase === 'embed' && `Indexing embeddings… ${libProgress.current.toLocaleString()} / ${libProgress.total.toLocaleString()}`}
+                {libProgress.phase === 'done' && 'Done.'}
+                {libProgress.phase === 'error' && `Error: ${libProgress.message}`}
+              </p>
+              {libProgress.total > 0 && libProgress.phase !== 'done' && libProgress.phase !== 'error' && (
+                <div className="w-full h-1 rounded-full overflow-hidden" style={{ background: '#302c1e' }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      background: '#e8c820',
+                      width: `${Math.min(100, (libProgress.current / libProgress.total) * 100)}%`,
+                      transition: 'width 0.2s',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={refreshTagLibrary}
+            disabled={libRefreshing}
+            className="px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{
+              background: libRefreshing ? '#302c1e' : '#242118',
+              color: libRefreshing ? '#635c48' : '#bfb8a8',
+              cursor: libRefreshing ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={e => { if (!libRefreshing) e.currentTarget.style.background = '#302c1e' }}
+            onMouseLeave={e => { if (!libRefreshing) e.currentTarget.style.background = '#242118' }}
+          >
+            {libRefreshing ? 'Refreshing…' : libStatus && libStatus.count > 0 ? '↻ Refresh tag library' : '⇩ Download tag library'}
+          </button>
         </div>
       </div>
     </div>
