@@ -5,6 +5,7 @@ import ChatTranscript from '../components/prompt/ChatTranscript.jsx'
 import InputDock from '../components/prompt/InputDock.jsx'
 import LoRAPicker from '../components/prompt/LoRAPicker.jsx'
 import TagLibraryPanel from '../components/prompt/TagLibraryPanel.jsx'
+import SavedPresetsDrawer from '../components/prompt/SavedPresetsDrawer.jsx'
 
 export default function PromptBuilder() {
   const [activeSessionId, setActiveSessionId] = useState(null)
@@ -17,6 +18,7 @@ export default function PromptBuilder() {
   const [transcriptTick, setTranscriptTick] = useState(0)
   const [libraryReady, setLibraryReady] = useState(true)
   const [apiKeySet, setApiKeySet] = useState(true)
+  const [presetsOpen, setPresetsOpen] = useState(false)
   const showToast = useToast()
   const insertTagRef = useRef(null)
 
@@ -172,6 +174,13 @@ export default function PromptBuilder() {
           >
             ↺ New chat
           </button>
+          <button
+            onClick={() => setPresetsOpen(true)}
+            className="px-3 py-1.5 rounded-lg text-xs"
+            style={{ background: '#242118', color: '#bfb8a8', border: '1px solid #302c1e' }}
+          >
+            ⎘ Saved
+          </button>
         </div>
       </div>
 
@@ -243,6 +252,7 @@ export default function PromptBuilder() {
           </div>
         </>
       )}
+      <SavedPresetsDrawer isOpen={presetsOpen} onClose={() => setPresetsOpen(false)} />
     </div>
   )
 }
