@@ -170,3 +170,28 @@ CREATE TABLE IF NOT EXISTS prompt_chat_messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_prompt_chat_messages_session ON prompt_chat_messages(session_id, id);
+
+CREATE TABLE IF NOT EXISTS saved_prompts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  source_message_id INTEGER REFERENCES prompt_chat_messages(id) ON DELETE SET NULL,
+  user_description TEXT,
+  positive_text TEXT NOT NULL,
+  negative_text TEXT NOT NULL,
+  positive_structured TEXT NOT NULL,
+  negative_structured TEXT NOT NULL,
+  model_family TEXT,
+  checkpoint_id INTEGER REFERENCES models(id) ON DELETE SET NULL,
+  temperature REAL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_prompts_created_at ON saved_prompts(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS saved_prompt_loras (
+  saved_prompt_id INTEGER NOT NULL REFERENCES saved_prompts(id) ON DELETE CASCADE,
+  lora_id INTEGER REFERENCES loras(id) ON DELETE SET NULL,
+  lora_filename_snapshot TEXT NOT NULL,
+  trigger_words_snapshot TEXT NOT NULL,
+  PRIMARY KEY (saved_prompt_id, lora_id)
+);

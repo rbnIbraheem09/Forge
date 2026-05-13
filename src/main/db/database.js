@@ -66,7 +66,11 @@ function getDatabase() {
     // prompt_chat_sessions and prompt_chat_messages are created idempotently by schema.sql.
   }
 
-  db.pragma('user_version = 7')
+  if (version < 8) {
+    // saved_prompts and saved_prompt_loras are created idempotently by schema.sql.
+  }
+
+  db.pragma('user_version = 8')
 
   return db
 }
