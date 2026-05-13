@@ -79,6 +79,9 @@ contextBridge.exposeInMainWorld('forge', {
     libraryStatus: () => ipcRenderer.invoke('prompt:library-status'),
     libraryRefresh: () => ipcRenderer.invoke('prompt:library-refresh'),
     libraryDelete: () => ipcRenderer.invoke('prompt:library-delete'),
+    setApiKey: (plaintext) => ipcRenderer.invoke('settings:setApiKey', { key: 'deepseek_api_key', plaintext }),
+    hasApiKey: () => ipcRenderer.invoke('settings:hasApiKey', { key: 'deepseek_api_key' }),
+    testApiKey: () => ipcRenderer.invoke('settings:testApiKey', { key: 'deepseek_api_key', baseUrl: 'https://api.deepseek.com/v1' }),
   },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),

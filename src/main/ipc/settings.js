@@ -40,6 +40,64 @@ function registerSettingsHandlers() {
     if (result.canceled || result.filePaths.length === 0) return null
     return result.filePaths[0]
   })
+
+  ipcMain.handle('settings:setApiKey', (_event, { key, plaintext }) => {
+    const { safeStorage } = require('electron')
+    if (!safeStorage.isEncryptionAvailable()) {
+      return { ok: false, reason: 'OS keychain unavailable' }
+    }
+    const db = getDatabase()
+    if (plaintext === null || plaintext === '' || plaintext === undefined) {
+      db.prepare('DELETE FROM settings WHERE key = ?').run(key)
+      return { ok: true, cleared: true }
+    }
+    const encrypted = safeStorage.encryptString(plaintext)
+    const base64 = encrypted.toString('base64')
+    db.prepare(
+      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+    ).run(key, base64)
+    return { ok: true }
+  })
+
+  ipcMain.handle('settings:hasApiKey', (_event, { key }) => {
+    const db = getDatabase()
+    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key)
+    return !!row && !!row.value
+  })
+
+  ipcMain.handle('settings:testApiKey', async (_event, { key, baseUrl }) => {
+    const { safeStorage } = require('electron')
+    const db = getDatabase()
+    const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key)
+    if (!row || !row.value) return { ok: false, reason: 'No API key set' }
+    let plaintext
+    try {
+      plaintext = safeStorage.decryptString(Buffer.from(row.value, 'base64'))
+    } catch (err) {
+      return { ok: false, reason: 'Failed to decrypt API key — keychain may be unavailable' }
+    }
+    try {
+      const resp = await fetch((baseUrl || 'https://api.deepseek.com/v1') + '/models', {
+        headers: { Authorization: 'Bearer ' + plaintext },
+      })
+      if (resp.ok) return { ok: true }
+      return { ok: false, reason: `HTTP ${resp.status} ${resp.statusText}` }
+    } catch (err) {
+      return { ok: false, reason: String(err && err.message || err) }
+    }
+  })
 }
 
-module.exports = { registerSettingsHandlers }
+function getDecryptedSetting(key) {
+  const { safeStorage } = require('electron')
+  const db = getDatabase()
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key)
+  if (!row || !row.value) return null
+  try {
+    return safeStorage.decryptString(Buffer.from(row.value, 'base64'))
+  } catch (err) {
+    return null
+  }
+}
+
+module.exports = { registerSettingsHandlers, getDecryptedSetting }
