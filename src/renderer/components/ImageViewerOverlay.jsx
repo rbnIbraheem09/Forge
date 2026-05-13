@@ -1,10 +1,9 @@
-// src/renderer/components/MetadataPanel.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { overlayBg, scaleIn } from '../lib/motion.js'
 import TagChips from './TagChips.jsx'
 import { useToast } from '../context/ToastContext.jsx'
-import { slideInRight } from '../lib/motion.js'
 
 function FieldRow({ label, value }) {
   return (
@@ -15,7 +14,7 @@ function FieldRow({ label, value }) {
   )
 }
 
-export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarChange }) {
+function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
   const [iter, setIter] = useState(null)
   const [globalFields, setGlobalFields] = useState([])
   const [customFields, setCustomFields] = useState([])
@@ -34,7 +33,6 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
     setIter(data)
     setNotesDraft(data.notes || '')
     setGlobalFields(gf)
-
     const existing = data.custom_fields || []
     const existingKeys = new Set(existing.map(f => f.field_key))
     const merged = [
@@ -46,22 +44,20 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
 
   useEffect(() => { load() }, [load])
 
-  const saveNotes = useCallback(async (val) => {
-    await window.forge.iterations.update({ id: iterationId, notes: val })
-  }, [iterationId])
-
   const handleNotesChange = (e) => {
     const val = e.target.value
     setNotesDraft(val)
     clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => saveNotes(val), 500)
+    saveTimer.current = setTimeout(async () => {
+      await window.forge.iterations.update({ id: iterationId, notes: val })
+    }, 500)
   }
 
   const toggleStar = async () => {
     const next = !iter.starred
     await window.forge.iterations.update({ id: iterationId, starred: next })
     setIter(prev => ({ ...prev, starred: next }))
-    onStarChange?.()
+    onChange?.()
   }
 
   const saveCustomFields = async (fields) => {
@@ -103,73 +99,54 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
   const saveTags = async (tags) => {
     await window.forge.iterations.update({ id: iterationId, tags })
     setIter(prev => ({ ...prev, tags }))
+    onChange?.()
+  }
+
+  const openMainGen = () => {
+    if (!mainGenId && !iter?.main_gen_id) return
+    onClose()
+    navigate(`/main-gens/${mainGenId || iter.main_gen_id}`)
   }
 
   if (!iter) return (
-    <div className="w-64 h-full flex items-center justify-center" style={{ color: '#635c48', fontSize: 12 }}>
+    <div className="flex-shrink-0 h-full flex items-center justify-center" style={{ width: 280, color: '#635c48', fontSize: 12 }}>
       Loading…
     </div>
   )
 
   return (
-    <motion.div
-      variants={slideInRight}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
+    <div
       className="flex-shrink-0 overflow-y-auto h-full"
-      style={{ width: '240px', background: '#1a1813', borderLeft: '1px solid #302c1e' }}
+      style={{ width: 300, background: '#1a1813', borderLeft: '1px solid #302c1e' }}
     >
       <div className="p-4 flex flex-col gap-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <p
-              className="text-sm font-semibold"
-              style={{ color: '#eae5dc', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-            >
+            <p className="text-sm font-semibold" style={{ color: '#eae5dc', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
               {iter.title || `Iteration #${iter.iteration_number}`}
             </p>
             <p className="text-[10px] mt-0.5" style={{ color: '#635c48' }}>
               {new Date(iter.created_at).toLocaleDateString()}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <motion.button
-              onClick={toggleStar}
-              className="text-base leading-none"
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.85 }}
-              style={{
-                color: iter.starred ? '#f0c840' : '#635c48',
-                transition: 'color 0.15s',
-              }}
-            >
-              {iter.starred ? '★' : '☆'}
-            </motion.button>
-            <motion.button
-              onClick={onClose}
-              className="text-sm"
-              style={{ color: '#635c48' }}
-              whileHover={{ color: '#e8c820' }}
-            >
-              ×
-            </motion.button>
-          </div>
+          <motion.button
+            onClick={toggleStar}
+            className="text-base leading-none"
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.85 }}
+            style={{ color: iter.starred ? '#f0c840' : '#635c48', transition: 'color 0.15s' }}
+          >
+            {iter.starred ? '★' : '☆'}
+          </motion.button>
         </div>
 
         {/* Extracted */}
         <div>
-          <p
-            className="text-[9px] uppercase tracking-wider mb-2"
-            style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-          >
+          <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
             Extracted
           </p>
-          <div
-            className="rounded-lg p-3 flex flex-col gap-2"
-            style={{ background: '#0f0e0b', border: '1px solid #302c1e' }}
-          >
+          <div className="rounded-lg p-3 flex flex-col gap-2" style={{ background: '#0f0e0b', border: '1px solid #302c1e' }}>
             <FieldRow label="Seed" value={iter.seed} />
             <FieldRow label="Steps" value={iter.steps} />
             <FieldRow label="CFG" value={iter.cfg} />
@@ -180,7 +157,7 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
               <div className="flex justify-between items-start text-xs">
                 <span style={{ color: '#635c48' }}>Checkpoint</span>
                 <button
-                  onClick={() => navigate(`/models/${iter.checkpoint_id}`)}
+                  onClick={() => { onClose(); navigate(`/models/${iter.checkpoint_id}`) }}
                   className="text-right hover:underline"
                   style={{ color: '#7aa0e8', wordBreak: 'break-all' }}
                 >
@@ -191,39 +168,35 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
           </div>
         </div>
 
-        {/* Divider */}
         <div style={{ borderTop: '1px solid #302c1e' }} />
 
         {/* LoRAs */}
         {iter.loras && iter.loras.length > 0 && (
-          <div>
-            <p
-              className="text-[9px] uppercase tracking-wider mb-2"
-              style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-            >
-              LoRAs
-            </p>
-            <div className="rounded-lg p-3 flex flex-col gap-2" style={{ background: '#0f0e0b', border: '1px solid #302c1e' }}>
-              {iter.loras.map(l => (
-                <div key={l.id} className="flex justify-between items-center text-xs">
-                  <button
-                    onClick={() => navigate(`/loras/${l.id}`)}
-                    className="hover:underline"
-                    style={{ color: '#7daa88' }}
-                  >
-                    {l.name}
-                  </button>
-                  <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: '#302c1e', color: '#eae5dc' }}>
-                    {l.weight}
-                  </span>
-                </div>
-              ))}
+          <>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
+                LoRAs
+              </p>
+              <div className="rounded-lg p-3 flex flex-col gap-2" style={{ background: '#0f0e0b', border: '1px solid #302c1e' }}>
+                {iter.loras.map(l => (
+                  <div key={l.id} className="flex justify-between items-center text-xs">
+                    <button
+                      onClick={() => { onClose(); navigate(`/loras/${l.id}`) }}
+                      className="hover:underline"
+                      style={{ color: '#7daa88' }}
+                    >
+                      {l.name}
+                    </button>
+                    <span className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: '#302c1e', color: '#eae5dc' }}>
+                      {l.weight}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+            <div style={{ borderTop: '1px solid #302c1e' }} />
+          </>
         )}
-
-        {/* Divider */}
-        <div style={{ borderTop: '1px solid #302c1e' }} />
 
         {/* Prompt */}
         <div>
@@ -257,48 +230,28 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
           )}
         </div>
 
-        {/* Divider */}
         <div style={{ borderTop: '1px solid #302c1e' }} />
 
         {/* Notes */}
         <div>
-          <p
-            className="text-[9px] uppercase tracking-wider mb-2"
-            style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-          >
+          <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
             Notes
           </p>
-          <style>{`
-            .forge-notes:focus {
-              border-color: #302c1e !important;
-              outline: none;
-              box-shadow: none;
-            }
-          `}</style>
           <textarea
             value={notesDraft}
             onChange={handleNotesChange}
             placeholder="Your notes…"
             rows={4}
-            className="forge-notes w-full rounded-lg px-3 py-2 text-xs outline-none resize-none"
-            style={{
-              background: '#0f0e0b',
-              border: '1px solid transparent',
-              color: '#eae5dc',
-              transition: 'border-color 0.15s',
-            }}
+            className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none"
+            style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#eae5dc' }}
           />
         </div>
 
-        {/* Divider */}
         <div style={{ borderTop: '1px solid #302c1e' }} />
 
         {/* Custom Fields */}
         <div>
-          <p
-            className="text-[9px] uppercase tracking-wider mb-2"
-            style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-          >
+          <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
             Custom Fields
           </p>
           <div className="flex flex-col gap-1.5">
@@ -311,14 +264,14 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
                     onChange={(e) => updateCustomField(idx, 'field_key', e.target.value)}
                     placeholder="Key"
                     className="flex-1 rounded px-2 py-1 text-xs outline-none"
-                    style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#bfb8a8', width: '70px' }}
+                    style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#bfb8a8', width: 70 }}
                   />
                   <input
                     value={f.field_value}
                     onChange={(e) => updateCustomField(idx, 'field_value', e.target.value)}
                     placeholder="Value"
                     className="flex-1 rounded px-2 py-1 text-xs outline-none"
-                    style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#eae5dc', width: '70px' }}
+                    style={{ background: '#0f0e0b', border: '1px solid #302c1e', color: '#eae5dc', width: 70 }}
                   />
                   <button
                     onClick={() => pinField(f.field_key)}
@@ -340,20 +293,101 @@ export default function MetadataPanel({ iterationId, mainGenId, onClose, onStarC
           </div>
         </div>
 
-        {/* Divider */}
         <div style={{ borderTop: '1px solid #302c1e' }} />
 
         {/* Tags */}
         <div>
-          <p
-            className="text-[9px] uppercase tracking-wider mb-2"
-            style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-          >
+          <p className="text-[9px] uppercase tracking-wider mb-2" style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}>
             Tags
           </p>
           <TagChips tags={iter.tags || ''} onChange={saveTags} />
         </div>
+
+        {/* Open Main Gen */}
+        {(mainGenId || iter.main_gen_id) && (
+          <>
+            <div style={{ borderTop: '1px solid #302c1e' }} />
+            <button
+              onClick={openMainGen}
+              className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
+              style={{ background: '#242118', color: '#e8c820', border: '1px solid #302c1e' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#302c1e' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#242118' }}
+            >
+              Open Main Gen →
+            </button>
+          </>
+        )}
       </div>
-    </motion.div>
+    </div>
+  )
+}
+
+export default function ImageViewerOverlay({ payload, onClose }) {
+  const isOpen = payload !== null
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.92)' }}
+          variants={overlayBg} initial="hidden" animate="visible" exit="exit"
+          onClick={onClose}
+        >
+          <motion.div
+            className="relative flex rounded-2xl overflow-hidden"
+            style={{
+              background: '#0f0e0b',
+              border: '1px solid #302c1e',
+              width: 'min(1400px, 92vw)',
+              height: 'min(900px, 92vh)',
+            }}
+            variants={scaleIn} initial="hidden" animate="visible"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Image column */}
+            <div className="flex-1 flex items-center justify-center p-4 cursor-zoom-out" onClick={onClose}>
+              <img
+                src={`forge://${payload.imagePath}`}
+                alt=""
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  borderRadius: 8,
+                  cursor: 'default',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Sidebar (iteration mode only) */}
+            {payload.iterationId && (
+              <IterationSidebar
+                iterationId={payload.iterationId}
+                mainGenId={payload.mainGenId}
+                onChange={payload.onChange}
+                onClose={onClose}
+              />
+            )}
+
+            {/* Close button — top-right of overlay */}
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(15,14,11,0.85)',
+                border: '1px solid #302c1e',
+                color: '#bfb8a8',
+                fontSize: 16,
+                lineHeight: 1,
+              }}
+              title="Close (Esc)"
+            >×</button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

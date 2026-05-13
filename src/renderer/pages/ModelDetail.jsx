@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
+import { useImageViewer } from '../context/ImageViewerContext.jsx'
 import ExamplesGrid from '../components/ExamplesGrid.jsx'
 
 export default function ModelDetail() {
   const { id } = useParams()
   const modelId = parseInt(id)
+  const { open: openViewer } = useImageViewer()
   const [model, setModel] = useState(null)
   const [usage, setUsage] = useState([])
   const [notes, setNotes] = useState('')
@@ -208,7 +210,7 @@ export default function ModelDetail() {
             {usage.map(iter => (
               <motion.div
                 key={iter.id}
-                onClick={() => navigate(`/main-gens/${iter.main_gen_id}`)}
+                onClick={() => openViewer({ imagePath: iter.image_path, iterationId: iter.id, mainGenId: iter.main_gen_id })}
                 className="relative cursor-pointer rounded-lg overflow-hidden"
                 style={{ aspectRatio: '0.85', background: '#1a1813', border: '1px solid #302c1e' }}
                 whileHover={{ scale: 1.04 }}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, useSpring, useMotionValue, useTransform } from 'framer-motion'
 import { fadeUp, stagger } from '../lib/motion.js'
+import { useImageViewer } from '../context/ImageViewerContext.jsx'
 
 function AnimatedNumber({ value }) {
   const motionVal = useSpring(0, { stiffness: 80, damping: 20 })
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const [starredIters, setStarredIters] = useState([])
   const [recentMgs, setRecentMgs] = useState([])
   const navigate = useNavigate()
+  const { open: openViewer } = useImageViewer()
 
   useEffect(() => {
     Promise.all([
@@ -199,7 +201,7 @@ export default function Dashboard() {
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.15 }}
               >
-                <div className="h-16" style={{ background: mg.hero_image_path ? `url(forge://${mg.hero_image_path}) center/cover` : mg.hero_color }} />
+                <div className="h-16" style={{ background: mg.hero_image_path ? `url(forge://thumb${mg.hero_image_path}) center/cover` : mg.hero_color }} />
                 <div className="p-2">
                   <p className="text-xs font-medium truncate" style={{ color: '#eae5dc' }}>{mg.title}</p>
                   <p className="text-[10px]" style={{ color: '#635c48' }}>{mg.iteration_count} iters</p>
@@ -218,13 +220,13 @@ export default function Dashboard() {
             {starredIters.map(iter => (
               <motion.div
                 key={iter.id}
-                onClick={() => navigate(`/main-gens/${iter.main_gen_id}`)}
+                onClick={() => openViewer({ imagePath: iter.image_path, iterationId: iter.id, mainGenId: iter.main_gen_id })}
                 className="flex-shrink-0 relative rounded-lg overflow-hidden cursor-pointer"
                 style={{ width: '80px', aspectRatio: '0.85', background: '#1a1813', border: '1px solid #302c1e' }}
                 whileHover={{ scale: 1.04 }}
                 transition={{ duration: 0.15 }}
               >
-                <img src={`forge://${iter.image_path}`} alt="" className="w-full h-full object-cover" />
+                <img src={`forge://thumb${iter.image_path}`} alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.7))' }} />
                 <div className="absolute bottom-1 left-1 right-1">
                   <p className="text-[9px] leading-tight" style={{ color: '#bfb8a8' }}>{iter.main_gen_title} #{iter.iteration_number}</p>
@@ -249,7 +251,7 @@ export default function Dashboard() {
                 whileHover={{ backgroundColor: '#242118' }}
                 transition={{ duration: 0.12 }}
               >
-                <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ background: mg.hero_image_path ? `url(forge://${mg.hero_image_path}) center/cover` : mg.hero_color }} />
+                <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ background: mg.hero_image_path ? `url(forge://thumb${mg.hero_image_path}) center/cover` : mg.hero_color }} />
                 <div className="flex-1">
                   <p className="text-sm font-medium" style={{ color: '#eae5dc' }}>{mg.title}</p>
                   <p className="text-xs" style={{ color: '#635c48' }}>{mg.iteration_count} iterations · {getTimeAgo(mg.updated_at)}</p>

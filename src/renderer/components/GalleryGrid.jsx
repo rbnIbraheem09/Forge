@@ -1,17 +1,16 @@
 // src/renderer/components/GalleryGrid.jsx
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { fadeUp, stagger } from '../lib/motion.js'
+import { fadeUp } from '../lib/motion.js'
 
 const SIZE_COLS = { S: 6, M: 4, L: 2 }
 
 export default function GalleryGrid({
   items,
   size = 'M',
-  selectedId,
   compareMode = false,
   compareSelected = new Set(),
-  onSelect,
+  onOpen,
   onCompareToggle,
   onStarToggle,
   renderOverlay,
@@ -19,25 +18,23 @@ export default function GalleryGrid({
   const cols = SIZE_COLS[size] || 4
 
   return (
-    <motion.div
+    <div
       className="grid gap-2"
       style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-      variants={stagger}
-      initial="hidden"
-      animate="visible"
     >
       {items.map((item) => {
-        const isSelected = item.id === selectedId
         const inCompare = compareSelected.has(item.id)
-        const isActiveHighlight = (isSelected && !compareMode) || inCompare
+        const isActiveHighlight = inCompare
 
         return (
           <motion.div
             key={item.id}
             variants={fadeUp}
+            initial="hidden"
+            animate="visible"
             onClick={() => {
               if (compareMode) onCompareToggle?.(item.id)
-              else onSelect?.(item.id)
+              else onOpen?.(item)
             }}
             className="relative cursor-pointer rounded-lg overflow-hidden group"
             style={{
@@ -54,7 +51,7 @@ export default function GalleryGrid({
               style={{ transformOrigin: 'center', height: '100%' }}
             >
               <img
-                src={`forge://${item.image_path}`}
+                src={`forge://thumb${item.image_path}`}
                 alt=""
                 className="w-full h-full object-cover"
                 style={{ display: 'block' }}
@@ -141,6 +138,6 @@ export default function GalleryGrid({
           </motion.div>
         )
       })}
-    </motion.div>
+    </div>
   )
 }

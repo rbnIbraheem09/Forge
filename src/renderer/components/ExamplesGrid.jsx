@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
+import { useImageViewer } from '../context/ImageViewerContext.jsx'
 import AddExampleMenu from './AddExampleMenu.jsx'
 import GalleryPickerOverlay from './GalleryPickerOverlay.jsx'
-import LightboxOverlay from './LightboxOverlay.jsx'
 
 export default function ExamplesGrid({ images, entityKind, entityId, entityName, onChanged }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [lightboxPath, setLightboxPath] = useState(null)
   const [deletingIds, setDeletingIds] = useState(() => new Set())
+  const { open: openViewer } = useImageViewer()
   const showToast = useToast()
   const max = 4
   const namespace = entityKind === 'lora' ? 'loras' : 'models'
@@ -84,7 +84,7 @@ export default function ExamplesGrid({ images, entityKind, entityId, entityName,
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1, transition: { duration: 0.22, ease: [0.16,1,0.3,1] } }}
       exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.18 } }}
-      onClick={() => setLightboxPath(img.image_path)}
+      onClick={() => openViewer({ imagePath: img.image_path })}
     >
       <img src={`forge://thumb${img.image_path}`} alt="" className="w-full h-full object-cover" />
       <button
@@ -162,12 +162,6 @@ export default function ExamplesGrid({ images, entityKind, entityId, entityName,
         entityName={entityName}
         onPick={addGallery}
         onClose={() => setPickerOpen(false)}
-      />
-
-      <LightboxOverlay
-        isOpen={lightboxPath !== null}
-        imagePath={lightboxPath}
-        onClose={() => setLightboxPath(null)}
       />
     </div>
   )

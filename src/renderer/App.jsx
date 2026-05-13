@@ -16,6 +16,7 @@ import SearchOverlay from './components/SearchOverlay.jsx'
 import OnboardingModal from './pages/OnboardingModal.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
 import { InboxProvider } from './context/InboxContext.jsx'
+import { ImageViewerProvider } from './context/ImageViewerContext.jsx'
 
 export default function App() {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -59,6 +60,7 @@ export default function App() {
     <HashRouter>
       <ToastProvider>
         <InboxProvider>
+         <ImageViewerProvider>
           <div className="flex h-screen w-screen overflow-hidden" style={{ background: '#0e0e0f' }}>
             <Sidebar />
             <main className="flex-1 overflow-y-auto">
@@ -84,6 +86,7 @@ export default function App() {
               />
             )}
           </div>
+         </ImageViewerProvider>
         </InboxProvider>
       </ToastProvider>
     </HashRouter>

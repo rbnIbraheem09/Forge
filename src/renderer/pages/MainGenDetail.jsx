@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { AnimatePresence } from 'framer-motion'
 import GalleryGrid from '../components/GalleryGrid.jsx'
-import MetadataPanel from '../components/MetadataPanel.jsx'
 import CompareOverlay from '../components/CompareOverlay.jsx'
-import { useToast } from '../context/ToastContext.jsx'
+import { useImageViewer } from '../context/ImageViewerContext.jsx'
 
 const SIZES = ['S', 'M', 'L']
 
@@ -14,12 +12,11 @@ export default function MainGenDetail() {
   const [mg, setMg] = useState(null)
   const [iterations, setIterations] = useState([])
   const [size, setSize] = useState('M')
-  const [selectedId, setSelectedId] = useState(null)
   const [compareMode, setCompareMode] = useState(false)
   const [compareSelected, setCompareSelected] = useState(new Set())
   const [compareData, setCompareData] = useState(null)
-  const showToast = useToast()
   const navigate = useNavigate()
+  const { open: openViewer } = useImageViewer()
 
   const load = useCallback(async () => {
     const [mgData, iters] = await Promise.all([
@@ -79,7 +76,7 @@ export default function MainGenDetail() {
           <div
             className="w-8 h-8 flex-shrink-0"
             style={{
-              background: mg.hero_image_path ? `url(forge://${mg.hero_image_path}) center/cover` : mg.hero_color,
+              background: mg.hero_image_path ? `url(forge://thumb${mg.hero_image_path}) center/cover` : mg.hero_color,
               borderRadius: '10px',
               overflow: 'hidden',
             }}
@@ -183,10 +180,9 @@ export default function MainGenDetail() {
             <GalleryGrid
               items={iterations}
               size={size}
-              selectedId={selectedId}
               compareMode={compareMode}
               compareSelected={compareSelected}
-              onSelect={(id) => setSelectedId(prev => prev === id ? null : id)}
+              onOpen={(item) => openViewer({ imagePath: item.image_path, iterationId: item.id, mainGenId, onChange: load })}
               onCompareToggle={toggleCompareSelect}
               renderOverlay={(item) =>
                 item.starred ? (
@@ -197,19 +193,6 @@ export default function MainGenDetail() {
           )}
         </div>
       </div>
-
-      {/* Metadata panel with AnimatePresence for animate in/out */}
-      <AnimatePresence>
-        {selectedId && !compareMode && (
-          <MetadataPanel
-            key={selectedId}
-            iterationId={selectedId}
-            mainGenId={mainGenId}
-            onClose={() => setSelectedId(null)}
-            onStarChange={load}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Compare overlay */}
       {compareData && (
