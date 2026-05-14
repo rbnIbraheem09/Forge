@@ -60,6 +60,9 @@ app.whenReady().then(() => {
   registerPromptChatHandlers()
   registerPromptPresetsHandlers()
 
+  // Wipe transient chat sessions on each boot — saved presets persist via saved_prompts.
+  try { getDatabase().exec('DELETE FROM prompt_chat_sessions') } catch {}
+
   createWindow()
 
   mainWindow.webContents.once('did-finish-load', () => {

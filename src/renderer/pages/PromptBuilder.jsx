@@ -23,10 +23,6 @@ export default function PromptBuilder() {
   const insertTagRef = useRef(null)
 
   useEffect(() => {
-    window.forge.prompt.sessions.list().then((list) => {
-      setSessions(list)
-      if (list.length > 0) setActiveSessionId(list[0].id)
-    }).catch(() => {})
     window.forge.settings.get('prompt_default_temperature').then((v) => {
       if (v) setDefaultTemp(parseFloat(v))
     }).catch(() => {})
@@ -58,11 +54,11 @@ export default function PromptBuilder() {
     setSessions(list)
   }, [])
 
-  const newChat = async () => {
-    const s = await window.forge.prompt.sessions.new()
-    setActiveSessionId(s.id)
+  const newChat = () => {
+    // Just clear the active session — the backend lazy-creates one on the first send.
+    setActiveSessionId(null)
     setSelectedLoraIds(new Set())
-    await reloadSessions()
+    setTranscriptTick(t => t + 1)
   }
 
   const toggleLora = (id) => {
