@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext.jsx'
 import { useInbox } from '../context/InboxContext.jsx'
 import { useImageViewer } from '../context/ImageViewerContext.jsx'
 import { fadeUp } from '../lib/motion.js'
+import ConfirmDialog from '../components/ConfirmDialog.jsx'
 
 export default function Inbox() {
   const [items, setItems] = useState([])
@@ -17,6 +18,7 @@ export default function Inbox() {
   const [showNewGenInput, setShowNewGenInput] = useState(false)
   const [cols, setCols] = useState(5)
   const [sortDir, setSortDir] = useState('desc')
+  const [confirmDismiss, setConfirmDismiss] = useState(false)
   const scrollRef = useRef(null)
   const showToast = useToast()
   const { setCount } = useInbox()
@@ -95,9 +97,16 @@ export default function Inbox() {
     navigate(`/main-gens/${result.mainGenId}`)
   }
 
-  const dismiss = async () => {
+  const requestDismiss = () => {
+    if (selected.size === 0) return
+    setConfirmDismiss(true)
+  }
+
+  const confirmDismissAction = async () => {
+    setConfirmDismiss(false)
+    const count = selected.size
     await window.forge.inbox.dismiss({ ids: [...selected] })
-    showToast('Dismissed.')
+    showToast(`Removed ${count} image${count !== 1 ? 's' : ''} from inbox.`)
     setSelected(new Set())
     await load()
   }
@@ -313,18 +322,27 @@ export default function Inbox() {
                 </button>
               ))}
               <button
-                onClick={dismiss}
+                onClick={requestDismiss}
                 className="px-3 py-1.5 rounded-lg text-sm ml-auto"
-                style={{ background: '#242118', color: '#bfb8a8', border: '1px solid #302c1e' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#302c1e' }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#242118' }}
+                style={{ background: '#2a1010', color: '#e87068', border: '1px solid #302c1e' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#3a1818' }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#2a1010' }}
+                title="Removes the selected images from the inbox view. The underlying PNG files on disk are not deleted."
               >
-                Dismiss
+                Remove
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        isOpen={confirmDismiss}
+        title="Remove from inbox?"
+        message={`This removes ${selected.size} image${selected.size !== 1 ? 's' : ''} from your inbox view. The PNG file${selected.size !== 1 ? 's' : ''} on disk stay untouched — you can re-import by rescanning the output folder.`}
+        onConfirm={confirmDismissAction}
+        onCancel={() => setConfirmDismiss(false)}
+      />
     </div>
   )
 }
