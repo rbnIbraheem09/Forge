@@ -5,6 +5,8 @@ import { useToast } from '../../context/ToastContext.jsx'
 
 export default function SavedPresetsDrawer({ isOpen, onClose }) {
   const [presets, setPresets] = useState([])
+  const [renamingId, setRenamingId] = useState(null)
+  const [renameText, setRenameText] = useState('')
   const showToast = useToast()
 
   const reload = () => {
@@ -25,6 +27,26 @@ export default function SavedPresetsDrawer({ isOpen, onClose }) {
     await window.forge.prompt.presets.delete(id)
     reload()
     showToast('Deleted.')
+  }
+
+  const startRename = (p) => {
+    setRenamingId(p.id)
+    setRenameText(p.name)
+  }
+
+  const cancelRename = () => {
+    setRenamingId(null)
+    setRenameText('')
+  }
+
+  const commitRename = async (id) => {
+    const next = renameText.trim()
+    if (!next) { cancelRename(); return }
+    await window.forge.prompt.presets.rename(id, next)
+    setRenamingId(null)
+    setRenameText('')
+    reload()
+    showToast('Renamed.')
   }
 
   return (
@@ -61,9 +83,31 @@ export default function SavedPresetsDrawer({ isOpen, onClose }) {
               <div className="flex flex-col gap-3">
                 {presets.map(p => (
                   <div key={p.id} className="rounded-lg p-4" style={{ background: '#242118', border: '1px solid #302c1e' }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium" style={{ color: '#eae5dc' }}>{p.name}</p>
-                      <p className="text-[10px]" style={{ color: '#635c48' }}>
+                    <div className="flex items-center justify-between mb-2 gap-2">
+                      {renamingId === p.id ? (
+                        <input
+                          autoFocus
+                          value={renameText}
+                          onChange={(e) => setRenameText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') commitRename(p.id)
+                            if (e.key === 'Escape') cancelRename()
+                          }}
+                          onBlur={() => commitRename(p.id)}
+                          className="flex-1 px-2 py-1 rounded text-sm"
+                          style={{ background: '#0f0e0b', border: '1px solid #4a4530', color: '#eae5dc', outline: 'none' }}
+                        />
+                      ) : (
+                        <p
+                          className="text-sm font-medium flex-1 cursor-text"
+                          style={{ color: '#eae5dc' }}
+                          onDoubleClick={() => startRename(p)}
+                          title="Double-click to rename"
+                        >
+                          {p.name}
+                        </p>
+                      )}
+                      <p className="text-[10px] flex-shrink-0" style={{ color: '#635c48' }}>
                         {new Date(p.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -89,6 +133,13 @@ export default function SavedPresetsDrawer({ isOpen, onClose }) {
                         style={{ background: '#242118', color: '#bfb8a8', border: '1px solid #302c1e' }}
                       >
                         Copy negative
+                      </button>
+                      <button
+                        onClick={() => startRename(p)}
+                        className="px-3 py-1.5 rounded text-xs"
+                        style={{ background: '#242118', color: '#bfb8a8', border: '1px solid #302c1e' }}
+                      >
+                        Rename
                       </button>
                       <button
                         onClick={() => remove(p.id, p.name)}

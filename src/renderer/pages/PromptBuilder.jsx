@@ -111,9 +111,7 @@ export default function PromptBuilder() {
     }
   }
 
-  const handleSavePreset = (assistantMessage) => {
-    const name = window.prompt('Save this prompt as:', 'Untitled preset')
-    if (!name) return
+  const handleSavePreset = async (assistantMessage) => {
     let structured = null
     try { structured = JSON.parse(assistantMessage.structured_response || 'null') } catch {}
     if (!structured) { showToast('Cannot save — malformed response.'); return }
@@ -121,6 +119,31 @@ export default function PromptBuilder() {
     const positive = structured.positive || []
     const negative = structured.negative || []
     const loraTriggers = positive.filter(t => t.type === 'lora_trigger')
+
+    // Auto-name: use the original user description (truncated) if we can fetch it,
+    // otherwise fall back to a date-stamped name.
+    let autoName = null
+    let userDescription = null
+    try {
+      const sessionId = assistantMessage.session_id || activeSessionId
+      if (sessionId) {
+        const messages = await window.forge.prompt.messages.list(sessionId)
+        // Find the user message immediately preceding this assistant message.
+        const idx = messages.findIndex(m => m.id === assistantMessage.id)
+        for (let i = idx - 1; i >= 0; i--) {
+          if (messages[i].role === 'user' && messages[i].content) {
+            userDescription = messages[i].content
+            autoName = messages[i].content.trim().slice(0, 60).replace(/\s+/g, ' ')
+            if (messages[i].content.length > 60) autoName += '…'
+            break
+          }
+        }
+      }
+    } catch {}
+    if (!autoName) {
+      const ts = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      autoName = `Preset ${ts}`
+    }
 
     const lorasSnapshot = loraTriggers.map(t => {
       const row = loraNamesById.get(t.lora_id)
@@ -131,22 +154,25 @@ export default function PromptBuilder() {
       }
     })
 
-    window.forge.prompt.presets.save({
-      name,
-      sourceMessageId: assistantMessage.id,
-      userDescription: null,
-      positiveText: positive.map(t => t.tag).join(', '),
-      negativeText: negative.map(t => t.tag).join(', '),
-      positiveStructured: JSON.stringify(positive),
-      negativeStructured: JSON.stringify(negative),
-      modelFamily: assistantMessage.model_family || null,
-      checkpointId: null,
-      temperature: assistantMessage.temperature,
-      loras: lorasSnapshot,
-    }).then((r) => {
-      if (r.ok) showToast(`Saved "${name}".`)
-      else showToast('Save failed.')
-    }).catch(() => showToast('Save failed.'))
+    try {
+      const r = await window.forge.prompt.presets.save({
+        name: autoName,
+        sourceMessageId: assistantMessage.id,
+        userDescription,
+        positiveText: positive.map(t => t.tag).join(', '),
+        negativeText: negative.map(t => t.tag).join(', '),
+        positiveStructured: JSON.stringify(positive),
+        negativeStructured: JSON.stringify(negative),
+        modelFamily: assistantMessage.model_family || null,
+        checkpointId: null,
+        temperature: assistantMessage.temperature,
+        loras: lorasSnapshot,
+      })
+      if (r.ok) showToast(`Saved as "${autoName}" — rename via Saved drawer if you want.`)
+      else showToast(`Save failed: ${r.reason || 'unknown'}`)
+    } catch (err) {
+      showToast(`Save error: ${err.message || err}`)
+    }
   }
 
   const selectedLorasArray = Array.from(selectedLoraIds).map(id => loraNamesById.get(id)).filter(Boolean)
