@@ -30,48 +30,68 @@ function registerPromptPresetsHandlers() {
   })
 
   ipcMain.handle('prompt:presets:save', (_e, args) => {
-    const {
-      name, sourceMessageId, userDescription,
-      positiveText, negativeText, positiveStructured, negativeStructured,
-      modelFamily, checkpointId, temperature, loras,
-    } = args
+    try {
+      console.log('[presets:save] args keys:', Object.keys(args || {}))
+      console.log('[presets:save] name:', args && args.name)
+      console.log('[presets:save] positiveText length:', args && args.positiveText && args.positiveText.length)
+      console.log('[presets:save] negativeText length:', args && args.negativeText && args.negativeText.length)
+      console.log('[presets:save] loras count:', args && Array.isArray(args.loras) ? args.loras.length : 'not array')
 
-    const db = getDatabase()
-    return db.transaction(() => {
-      const result = db.prepare(`
-        INSERT INTO saved_prompts (
-          name, source_message_id, user_description,
-          positive_text, negative_text, positive_structured, negative_structured,
-          model_family, checkpoint_id, temperature
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        name,
-        sourceMessageId || null,
-        userDescription || null,
-        positiveText,
-        negativeText,
-        positiveStructured,
-        negativeStructured,
-        modelFamily || null,
-        checkpointId || null,
-        typeof temperature === 'number' ? temperature : null
-      )
+      const {
+        name, sourceMessageId, userDescription,
+        positiveText, negativeText, positiveStructured, negativeStructured,
+        modelFamily, checkpointId, temperature, loras,
+      } = args
 
-      const presetId = result.lastInsertRowid
+      if (!name) return { ok: false, reason: 'Missing name' }
+      if (!positiveText) return { ok: false, reason: 'Missing positiveText' }
+      if (!negativeText) return { ok: false, reason: 'Missing negativeText' }
+      if (!positiveStructured) return { ok: false, reason: 'Missing positiveStructured' }
+      if (!negativeStructured) return { ok: false, reason: 'Missing negativeStructured' }
 
-      if (Array.isArray(loras) && loras.length > 0) {
-        const loraInsert = db.prepare(`
-          INSERT INTO saved_prompt_loras (
-            saved_prompt_id, lora_id, lora_filename_snapshot, trigger_words_snapshot
-          ) VALUES (?, ?, ?, ?)
-        `)
-        for (const l of loras) {
-          loraInsert.run(presetId, l.lora_id || null, l.filename || '(unknown)', l.trigger_words || '')
+      const db = getDatabase()
+      const result = db.transaction(() => {
+        const insertResult = db.prepare(`
+          INSERT INTO saved_prompts (
+            name, source_message_id, user_description,
+            positive_text, negative_text, positive_structured, negative_structured,
+            model_family, checkpoint_id, temperature
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          name,
+          sourceMessageId || null,
+          userDescription || null,
+          positiveText,
+          negativeText,
+          positiveStructured,
+          negativeStructured,
+          modelFamily || null,
+          checkpointId || null,
+          typeof temperature === 'number' ? temperature : null
+        )
+
+        const presetId = insertResult.lastInsertRowid
+
+        if (Array.isArray(loras) && loras.length > 0) {
+          const loraInsert = db.prepare(`
+            INSERT INTO saved_prompt_loras (
+              saved_prompt_id, lora_id, lora_filename_snapshot, trigger_words_snapshot
+            ) VALUES (?, ?, ?, ?)
+          `)
+          for (const l of loras) {
+            loraInsert.run(presetId, l.lora_id || null, l.filename || '(unknown)', l.trigger_words || '')
+          }
         }
-      }
 
-      return { ok: true, id: presetId }
-    })()
+        return { ok: true, id: presetId }
+      })()
+
+      console.log('[presets:save] success, id:', result.id)
+      return result
+    } catch (err) {
+      console.error('[presets:save] ERROR:', err && err.message, err && err.stack)
+      return { ok: false, reason: 'Save failed: ' + (err && err.message || String(err)) }
+    }
   })
 
   ipcMain.handle('prompt:presets:delete', (_e, { id }) => {

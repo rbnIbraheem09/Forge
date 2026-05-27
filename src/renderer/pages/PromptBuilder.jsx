@@ -112,6 +112,7 @@ export default function PromptBuilder() {
   }
 
   const handleSavePreset = async (assistantMessage) => {
+    console.log('[handleSavePreset] called with message id:', assistantMessage && assistantMessage.id)
     let structured = null
     try { structured = JSON.parse(assistantMessage.structured_response || 'null') } catch {}
     if (!structured) { showToast('Cannot save — malformed response.'); return }
@@ -168,8 +169,14 @@ export default function PromptBuilder() {
         temperature: assistantMessage.temperature,
         loras: lorasSnapshot,
       })
-      if (r.ok) showToast(`Saved as "${autoName}" — rename via Saved drawer if you want.`)
-      else showToast(`Save failed: ${r.reason || 'unknown'}`)
+      if (r && r.ok) {
+        showToast(`Saved as "${autoName}" — rename via Saved drawer if you want.`)
+        console.log('[handleSavePreset] saved with id:', r.id)
+      } else {
+        const reason = (r && r.reason) || 'unknown — see DevTools console'
+        showToast(`Save failed: ${reason}`)
+        console.error('[handleSavePreset] save returned not-ok:', r)
+      }
     } catch (err) {
       showToast(`Save error: ${err.message || err}`)
     }
