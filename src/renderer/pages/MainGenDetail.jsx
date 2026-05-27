@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import GalleryGrid from '../components/GalleryGrid.jsx'
 import CompareOverlay from '../components/CompareOverlay.jsx'
 import { useImageViewer } from '../context/ImageViewerContext.jsx'
+import { useToast } from '../context/ToastContext.jsx'
 
 const SIZES = ['S', 'M', 'L']
 
@@ -17,6 +18,7 @@ export default function MainGenDetail() {
   const [compareData, setCompareData] = useState(null)
   const navigate = useNavigate()
   const { open: openViewer } = useImageViewer()
+  const showToast = useToast()
 
   const load = useCallback(async () => {
     const [mgData, iters] = await Promise.all([
@@ -49,6 +51,13 @@ export default function MainGenDetail() {
       return next
     })
   }
+
+  const setCover = useCallback(async (e, iterationId) => {
+    e.stopPropagation()
+    await window.forge.mainGens.setHero(mainGenId, iterationId)
+    showToast('Cover updated.')
+    load()
+  }, [mainGenId, showToast, load])
 
   if (!mg) return (
     <div className="flex items-center justify-center h-full" style={{ color: '#635c48' }}>
@@ -184,11 +193,48 @@ export default function MainGenDetail() {
               compareSelected={compareSelected}
               onOpen={(item) => openViewer({ imagePath: item.image_path, iterationId: item.id, mainGenId, onChange: load })}
               onCompareToggle={toggleCompareSelect}
-              renderOverlay={(item) =>
-                item.starred ? (
-                  <div className="absolute top-1.5 right-1.5 text-xs" style={{ color: '#f0c840' }}>⭐</div>
-                ) : null
-              }
+              renderOverlay={(item) => {
+                const isCover = mg.hero_image_path && item.image_path === mg.hero_image_path
+                return (
+                  <>
+                    {/* "Set as cover" button — visible on group hover, hidden when already cover */}
+                    {!isCover && (
+                      <button
+                        onClick={(e) => setCover(e, item.id)}
+                        className="absolute bottom-1.5 left-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 rounded px-1.5 py-0.5 text-[9px] font-medium leading-none"
+                        style={{
+                          background: 'rgba(0,0,0,0.65)',
+                          color: '#bfb8a8',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(232,200,32,0.2)'; e.currentTarget.style.color = '#e8c820' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.65)'; e.currentTarget.style.color = '#bfb8a8' }}
+                      >
+                        Set as cover
+                      </button>
+                    )}
+
+                    {/* "Cover" badge — permanently visible on the current cover iteration */}
+                    {isCover && (
+                      <div
+                        className="absolute bottom-1.5 left-1.5 rounded px-1.5 py-0.5 text-[9px] font-medium leading-none"
+                        style={{
+                          background: 'rgba(232,200,32,0.25)',
+                          color: '#e8c820',
+                          border: '1px solid rgba(232,200,32,0.4)',
+                        }}
+                      >
+                        ✓ Cover
+                      </div>
+                    )}
+
+                    {/* Starred indicator */}
+                    {item.starred && (
+                      <div className="absolute top-1.5 right-1.5 text-xs" style={{ color: '#f0c840' }}>⭐</div>
+                    )}
+                  </>
+                )
+              }}
             />
           )}
         </div>
