@@ -24,7 +24,7 @@ function MainGenCard({ mg, onDelete, onTogglePin }) {
       {/* Hero */}
       <div className="h-32 relative">
         {mg.hero_image_path ? (
-          <img src={`forge://${mg.hero_image_path}`} alt="" className="w-full h-full object-cover" />
+          <img src={`forge://thumb${mg.hero_image_path}`} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full" style={{ background: mg.hero_color || '#302c1e' }} />
         )}
@@ -79,6 +79,8 @@ function getTimeAgo(dateStr) {
 export default function MainGensList() {
   const [allGens, setAllGens] = useState([])
   const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('updated_at')
+  const [sortDir, setSortDir] = useState('desc')
   const [toDelete, setToDelete] = useState(null)
   const [creating, setCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -93,8 +95,16 @@ export default function MainGensList() {
   useEffect(() => { load() }, [load])
 
   const filtered = allGens.filter(mg => mg.title.toLowerCase().includes(search.toLowerCase()))
-  const pinned = filtered.filter(mg => mg.pinned)
-  const rest = filtered.filter(mg => !mg.pinned)
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    let av, bv
+    if (sortBy === 'title') { av = (a.title || '').toLowerCase(); bv = (b.title || '').toLowerCase() }
+    else if (sortBy === 'created_at') { av = a.created_at || ''; bv = b.created_at || '' }
+    else { av = a.updated_at || ''; bv = b.updated_at || '' }
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0
+    return sortDir === 'asc' ? cmp : -cmp
+  })
+  const pinned = sortedFiltered.filter(mg => mg.pinned)
+  const rest = sortedFiltered.filter(mg => !mg.pinned)
 
   const createNew = async (e) => {
     e.preventDefault()
@@ -143,6 +153,26 @@ export default function MainGensList() {
           onFocus={(e) => { e.target.style.borderColor = '#302c1e'; e.target.style.boxShadow = 'none' }}
           onBlur={(e) => { e.target.style.borderColor = '#302c1e' }}
         />
+        <div className="flex items-center gap-1">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-2 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
+            style={{ background: '#1a1813', border: '1px solid #302c1e', color: '#bfb8a8', appearance: 'none', paddingRight: '24px' }}
+          >
+            <option value="updated_at">Date updated</option>
+            <option value="created_at">Date created</option>
+            <option value="title">Name</option>
+          </select>
+          <button
+            onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+            className="px-2 py-1.5 rounded-lg text-xs"
+            style={{ background: '#1a1813', border: '1px solid #302c1e', color: '#bfb8a8', minWidth: '32px' }}
+            title={sortDir === 'asc' ? 'Ascending — click for descending' : 'Descending — click for ascending'}
+          >
+            {sortDir === 'asc' ? '↑' : '↓'}
+          </button>
+        </div>
         <button
           onClick={() => setCreating(true)}
           className="px-3 py-1.5 rounded-lg text-sm font-medium"

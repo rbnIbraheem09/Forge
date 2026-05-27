@@ -7,6 +7,8 @@ import { familyLabel } from '../lib/model-families.js'
 export default function ModelsList() {
   const [models, setModels] = useState([])
   const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('usage_count')
+  const [sortDir, setSortDir] = useState('desc')
   const [scanning, setScanning] = useState(false)
   const [mergeMode, setMergeMode] = useState(false)
   const [selected, setSelected] = useState(new Set())
@@ -60,6 +62,14 @@ export default function ModelsList() {
   }
 
   const filtered = models.filter(m => m.name.toLowerCase().includes(search.toLowerCase()))
+  const sortedFiltered = [...filtered].sort((a, b) => {
+    let av, bv
+    if (sortBy === 'name') { av = (a.name || '').toLowerCase(); bv = (b.name || '').toLowerCase() }
+    else if (sortBy === 'created_at') { av = a.created_at || ''; bv = b.created_at || '' }
+    else { av = a.usage_count || 0; bv = b.usage_count || 0 }
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0
+    return sortDir === 'asc' ? cmp : -cmp
+  })
 
   return (
     <div className="h-full overflow-y-auto p-6" style={{ background: '#0f0e0b' }}>
@@ -77,6 +87,26 @@ export default function ModelsList() {
           className="px-3 py-1.5 rounded-lg text-sm outline-none"
           style={{ background: '#1a1813', border: '1px solid #302c1e', color: '#eae5dc', width: '160px' }}
         />
+        <div className="flex items-center gap-1">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-2 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
+            style={{ background: '#1a1813', border: '1px solid #302c1e', color: '#bfb8a8', appearance: 'none', paddingRight: '24px' }}
+          >
+            <option value="usage_count">Usage count</option>
+            <option value="name">Name</option>
+            <option value="created_at">Date created</option>
+          </select>
+          <button
+            onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+            className="px-2 py-1.5 rounded-lg text-xs"
+            style={{ background: '#1a1813', border: '1px solid #302c1e', color: '#bfb8a8', minWidth: '32px' }}
+            title={sortDir === 'asc' ? 'Ascending — click for descending' : 'Descending — click for ascending'}
+          >
+            {sortDir === 'asc' ? '↑' : '↓'}
+          </button>
+        </div>
         <button
           onClick={toggleMergeMode}
           className="px-3 py-1.5 rounded-lg text-sm transition-colors"
@@ -98,7 +128,7 @@ export default function ModelsList() {
         </button>
       </div>
 
-      {filtered.length === 0 ? (
+      {sortedFiltered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-3">
           <div className="text-3xl">🧱</div>
           <p className="text-sm font-medium" style={{ color: '#eae5dc' }}>No Checkpoints found</p>
@@ -106,7 +136,7 @@ export default function ModelsList() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {filtered.map(m => {
+          {sortedFiltered.map(m => {
             const isSelected = selected.has(m.id)
             return (
               <motion.div
