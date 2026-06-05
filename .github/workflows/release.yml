@@ -19,8 +19,10 @@ jobs:
       matrix:
         include:
           - os: macos-latest   # Apple Silicon (arm64)
-          - os: macos-13       # Intel (x64)
           - os: windows-latest # Windows (x64)
+          # macos-13 (Intel) dropped: scarce runners cause long queues, and
+          # Apple Silicon covers essentially all Macs since 2020. Re-add
+          # `- os: macos-13` here if Intel Mac support is needed later.
     runs-on: ${{ matrix.os }}
 
     steps:
