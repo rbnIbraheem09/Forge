@@ -95,7 +95,7 @@ function registerIterationsHandlers() {
         }
       }
 
-      db.prepare('UPDATE main_gens SET updated_at = datetime("now") WHERE id = ?').run(mainGenId)
+      db.prepare("UPDATE main_gens SET updated_at = datetime('now') WHERE id = ?").run(mainGenId)
       return { id: result.lastInsertRowid, iteration_number: iterNum }
     })()
   })

@@ -44,7 +44,7 @@ function registerMainGensHandlers() {
     if (pinned !== undefined) { fields.push('pinned = ?'); values.push(pinned ? 1 : 0) }
     if (notes !== undefined) { fields.push('notes = ?'); values.push(notes) }
     if (tags !== undefined) { fields.push('tags = ?'); values.push(tags) }
-    fields.push('updated_at = datetime("now")')
+    fields.push("updated_at = datetime('now')")
     if (fields.length === 1) return true
     db.prepare(`UPDATE main_gens SET ${fields.join(', ')} WHERE id = ?`).run(...values, id)
     return true
@@ -60,7 +60,7 @@ function registerMainGensHandlers() {
     const db = getDatabase()
     const iter = db.prepare('SELECT image_path FROM iterations WHERE id = ?').get(iterationId)
     if (!iter) return false
-    db.prepare('UPDATE main_gens SET hero_image_path = ?, updated_at = datetime("now") WHERE id = ?')
+    db.prepare("UPDATE main_gens SET hero_image_path = ?, updated_at = datetime('now') WHERE id = ?")
       .run(iter.image_path, id)
     return true
   })
