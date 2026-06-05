@@ -12,6 +12,7 @@ const { registerSearchHandlers } = require('./ipc/search')
 const { registerPromptLibraryHandlers } = require('./ipc/prompt-library')
 const { registerPromptChatHandlers } = require('./ipc/prompt-chat')
 const { registerPromptPresetsHandlers } = require('./ipc/prompt-presets')
+const { registerSystemHandlers } = require('./ipc/system')
 const { startOutputScanner, stopOutputScanner } = require('./scanner/output-scanner')
 const { scanLorasFolder, scanCheckpointsFolder } = require('./scanner/folder-scanner')
 const { getDatabase } = require('./db/database')
@@ -59,6 +60,7 @@ app.whenReady().then(() => {
   registerPromptLibraryHandlers()
   registerPromptChatHandlers()
   registerPromptPresetsHandlers()
+  registerSystemHandlers()
 
   // Wipe transient chat sessions on each boot — saved presets persist via saved_prompts.
   try { getDatabase().exec('DELETE FROM prompt_chat_sessions') } catch {}

@@ -99,6 +99,9 @@ contextBridge.exposeInMainWorld('forge', {
       rename: (id, name) => ipcRenderer.invoke('prompt:presets:rename', { id, name }),
     },
   },
+  system: {
+    openExternal: (url) => ipcRenderer.invoke('system:open-external', url),
+  },
   scanner: {
     restart: () => ipcRenderer.send('scanner:restart'),
   },

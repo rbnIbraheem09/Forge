@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
 import { useImageViewer } from '../context/ImageViewerContext.jsx'
 import ExamplesGrid from '../components/ExamplesGrid.jsx'
+import NotesField from '../components/NotesField.jsx'
 import { MODEL_FAMILIES } from '../lib/model-families.js'
 
 export default function ModelDetail() {
@@ -228,20 +229,7 @@ export default function ModelDetail() {
 
           <div>
             <p className="text-xs uppercase tracking-wider mb-2" style={{ color: '#635c48' }}>Notes</p>
-            <textarea
-              value={notes}
-              onChange={handleNotesChange}
-              onFocus={() => setFocused('notes')}
-              onBlur={() => setFocused(null)}
-              placeholder="Your notes on this checkpoint…"
-              rows={5}
-              className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-colors"
-              style={{
-                background: '#1a1813',
-                border: focused === 'notes' ? '1px solid #635c48' : '1px solid transparent',
-                color: '#eae5dc',
-              }}
-            />
+            <NotesField value={notes} onChange={handleNotesChange} placeholder="Your notes on this checkpoint…" minRows={5} />
           </div>
         </div>
       </div>
