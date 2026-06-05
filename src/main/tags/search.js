@@ -137,4 +137,86 @@ async function searchTags(query, options = {}) {
   return final.slice(0, limit)
 }
 
-module.exports = { searchTags, loadEmbeddingCache, unloadEmbeddingCache }
+// Exact-name lookup so freeform-typed tags can be colored by their Danbooru category.
+// Returns a plain object { [name]: category }. Names not in the library are absent.
+function resolveTags(names) {
+  const list = (names || []).map(n => String(n).trim().toLowerCase()).filter(Boolean)
+  if (list.length === 0) return {}
+  const db = getDatabase()
+  const ph = list.map(() => '?').join(',')
+  const rows = db.prepare(
+    `SELECT name, category FROM danbooru_tags WHERE name IN (${ph})`
+  ).all(...list)
+  const map = {}
+  for (const r of rows) map[r.name] = r.category
+  return map
+}
+
+// Given the tags currently in the prompt, return the most semantically-related tags
+// from the library (excluding the inputs). Danbooru tags reuse their pre-stored
+// embedding (no model call); freeform tags are embedded on the fly so they still steer.
+async function relatedTags(tagNames, options = {}) {
+  const limit = Math.max(1, Math.min(40, options.limit || 24))
+  const names = (tagNames || []).map(n => String(n).trim().toLowerCase()).filter(Boolean)
+  if (names.length === 0) return []
+
+  loadEmbeddingCache()
+  if (!embeddingMatrix || embeddingIds.length === 0) return []
+
+  const db = getDatabase()
+  const placeholders = names.map(() => '?').join(',')
+  const known = db.prepare(
+    `SELECT id, name FROM danbooru_tags WHERE name IN (${placeholders})`
+  ).all(...names)
+  const knownIds = new Set(known.map(r => r.id))
+  const knownNameSet = new Set(known.map(r => r.name))
+
+  // id -> matrix row index (embeddingIds is parallel to matrix rows).
+  const idToRow = new Map()
+  for (let i = 0; i < embeddingIds.length; i++) idToRow.set(embeddingIds[i], i)
+
+  const avg = new Float32Array(EMBEDDING_DIM)
+  let counted = 0
+
+  for (const r of known) {
+    const row = idToRow.get(r.id)
+    if (row === undefined) continue
+    const base = row * EMBEDDING_DIM
+    for (let j = 0; j < EMBEDDING_DIM; j++) avg[j] += embeddingMatrix[base + j]
+    counted++
+  }
+
+  const unknown = names.filter(n => !knownNameSet.has(n))
+  if (unknown.length > 0) {
+    const vecs = await embedTexts(unknown)
+    for (const v of vecs) {
+      for (let j = 0; j < EMBEDDING_DIM; j++) avg[j] += v[j]
+      counted++
+    }
+  }
+
+  if (counted === 0) return []
+
+  // Renormalize the centroid — cosineRankAll expects a unit vector.
+  let norm = 0
+  for (let j = 0; j < EMBEDDING_DIM; j++) norm += avg[j] * avg[j]
+  norm = Math.sqrt(norm) || 1
+  for (let j = 0; j < EMBEDDING_DIM; j++) avg[j] /= norm
+
+  // Over-fetch, drop tags already in the prompt, hydrate, return.
+  const ranked = cosineRankAll(avg, limit + names.length + 8)
+  const ids = ranked.map(r => r.id).filter(id => !knownIds.has(id)).slice(0, limit + 8)
+  if (ids.length === 0) return []
+
+  const ph2 = ids.map(() => '?').join(',')
+  const rows = db.prepare(
+    `SELECT id, name, category, post_count FROM danbooru_tags WHERE id IN (${ph2})`
+  ).all(...ids)
+  const byId = new Map(rows.map(r => [r.id, r]))
+
+  return ids.map(id => byId.get(id)).filter(Boolean)
+    .filter(t => !knownNameSet.has(t.name))
+    .slice(0, limit)
+}
+
+module.exports = { searchTags, relatedTags, resolveTags, loadEmbeddingCache, unloadEmbeddingCache }

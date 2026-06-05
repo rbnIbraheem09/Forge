@@ -6,13 +6,21 @@ const { ipcMain, BrowserWindow } = require('electron')
 const { getDatabase } = require('../db/database')
 const { downloadCsv } = require('../tags/downloader')
 const { importCsv, indexEmbeddings } = require('../tags/indexer')
-const { searchTags, unloadEmbeddingCache } = require('../tags/search')
+const { searchTags, relatedTags, resolveTags, unloadEmbeddingCache } = require('../tags/search')
 
 let refreshInProgress = false
 
 function registerPromptLibraryHandlers() {
   ipcMain.handle('prompt:search-tags', async (_e, { query, options }) => {
     return searchTags(query, options || {})
+  })
+
+  ipcMain.handle('prompt:related-tags', async (_e, { tags, options }) => {
+    return relatedTags(tags || [], options || {})
+  })
+
+  ipcMain.handle('prompt:resolve-tags', (_e, { names }) => {
+    return resolveTags(names || [])
   })
 
   ipcMain.handle('prompt:library-status', () => {
