@@ -1,0 +1,50 @@
+name: Release
+
+# Cut a release by pushing a version tag, e.g.:
+#   git tag v1.0.0 && git push origin v1.0.0
+# Or run manually from the Actions tab (workflow_dispatch).
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # electron-builder needs this to create the GitHub Release
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest   # Apple Silicon (arm64)
+          - os: macos-13       # Intel (x64)
+          - os: windows-latest # Windows (x64)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Installs deps and runs the postinstall electron-rebuild, which compiles
+      # better-sqlite3 against the Electron ABI natively on each OS/arch.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer (Vite)
+        run: npx vite build
+
+      # electron-builder auto-detects the platform from the runner OS and the
+      # target arch from the runner arch, then uploads artifacts to a draft
+      # GitHub Release matching the pushed tag. GH_TOKEN authorizes the upload.
+      - name: Package & publish (unsigned)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --publish always

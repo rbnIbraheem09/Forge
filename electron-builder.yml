@@ -2,6 +2,7 @@ appId: com.forge.app
 productName: Forge
 directories:
   output: dist/package
+  buildResources: build
 files:
   - dist/renderer/**
   - src/main/**
@@ -11,6 +12,21 @@ mac:
   category: public.app-category.productivity
   target:
     - dmg
+    - zip
   darkModeSupport: true
+  # Unsigned: no Apple Developer cert wired up. On first launch users
+  # right-click > Open (or System Settings > Privacy & Security > Open Anyway).
+  identity: null
 dmg:
   title: Forge
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+publish:
+  provider: github
+  owner: rbnIbraheem09
+  repo: Forge
