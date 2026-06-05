@@ -16,6 +16,7 @@ export default function MainGenDetail() {
   const [compareMode, setCompareMode] = useState(false)
   const [compareSelected, setCompareSelected] = useState(new Set())
   const [compareData, setCompareData] = useState(null)
+  const [heroColor, setHeroColor] = useState('#302c1e')
   const navigate = useNavigate()
   const { open: openViewer } = useImageViewer()
   const showToast = useToast()
@@ -30,6 +31,10 @@ export default function MainGenDetail() {
   }, [mainGenId])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (mg) setHeroColor(mg.hero_color || '#302c1e')
+  }, [mg])
 
   const openCompare = async () => {
     const [idA, idB] = [...compareSelected]
@@ -85,7 +90,7 @@ export default function MainGenDetail() {
           <div
             className="w-8 h-8 flex-shrink-0"
             style={{
-              background: mg.hero_image_path ? `url(forge://thumb${mg.hero_image_path}) center/cover` : mg.hero_color,
+              background: mg.hero_image_path ? `url(forge://thumb${mg.hero_image_path}) center/cover` : heroColor,
               borderRadius: '10px',
               overflow: 'hidden',
             }}
@@ -114,6 +119,30 @@ export default function MainGenDetail() {
           >
             {mg.pinned ? '📌' : '📍'}
           </button>
+
+          {/* Hero color picker */}
+          <input
+            type="color"
+            value={heroColor}
+            title="Cover color — shown on the card when there's no cover image"
+            onChange={(e) => setHeroColor(e.target.value)}
+            onBlur={async () => {
+              if (heroColor === mg.hero_color) return
+              await window.forge.mainGens.update({ id: mainGenId, hero_color: heroColor })
+              load()
+              showToast('Cover color updated.')
+            }}
+            style={{
+              width: 28,
+              height: 28,
+              padding: 0,
+              border: '1px solid #302c1e',
+              borderRadius: '8px',
+              background: 'transparent',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          />
 
           {/* Size toggle */}
           <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid #302c1e' }}>
