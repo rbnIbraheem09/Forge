@@ -216,7 +216,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                             >
                               {(item.hero_image_path || item.image_path) && (
                                 <img
-                                  src={`forge://${item.hero_image_path || item.image_path}`}
+                                  src={`forge://thumb${item.hero_image_path || item.image_path}`}
                                   alt=""
                                   className="w-full h-full object-cover"
                                 />

@@ -1,5 +1,6 @@
 // src/main/scanner/png-metadata.js
 const fs = require('fs')
+const path = require('path')
 
 function extractPngMetadata(imagePath) {
   let buffer
@@ -10,7 +11,9 @@ function extractPngMetadata(imagePath) {
   }
 
   const raw = readPngTextChunks(buffer)
-  const workflowJson = raw.workflow || raw.prompt || null
+  // Prefer `prompt` (ComfyUI API format: flat dict keyed by node ID with class_type + inputs)
+  // over `workflow` (visual graph format: {nodes:[...], links:[...]} — not parseable the same way)
+  const workflowJson = raw.prompt || raw.workflow || null
   if (!workflowJson) return null
 
   let workflow
@@ -107,7 +110,7 @@ function parseComfyWorkflow(workflow) {
       case 'CheckpointLoaderSimple':
       case 'CheckpointLoader':
         if (inputs.ckpt_name) {
-          result.checkpoint_name = inputs.ckpt_name.replace(/\.[^.]+$/, '')
+          result.checkpoint_name = path.basename(inputs.ckpt_name, path.extname(inputs.ckpt_name))
         }
         break
 
@@ -115,7 +118,7 @@ function parseComfyWorkflow(workflow) {
       case 'LoRALoader':
         if (inputs.lora_name) {
           result.loras.push({
-            name: inputs.lora_name.replace(/\.[^.]+$/, ''),
+            name: path.basename(inputs.lora_name, path.extname(inputs.lora_name)),
             weight: inputs.strength_model !== undefined ? Number(inputs.strength_model) : 1.0,
           })
         }

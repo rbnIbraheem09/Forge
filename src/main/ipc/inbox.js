@@ -23,7 +23,7 @@ function hslToHex(h, s, l) {
 function registerInboxHandlers() {
   ipcMain.handle('inbox:list', () => {
     const db = getDatabase()
-    return db.prepare('SELECT * FROM inbox_items ORDER BY detected_at DESC').all()
+    return db.prepare('SELECT * FROM inbox_items ORDER BY COALESCE(file_mtime, detected_at) DESC').all()
   })
 
   ipcMain.handle('inbox:count', () => {
@@ -68,7 +68,11 @@ function registerInboxHandlers() {
 
         let checkpointId = null
         if (meta.checkpoint_name) {
-          const model = db.prepare('SELECT id FROM models WHERE name = ?').get(meta.checkpoint_name)
+          let model = db.prepare('SELECT id FROM models WHERE name = ?').get(meta.checkpoint_name)
+          if (!model) {
+            db.prepare("INSERT OR IGNORE INTO models (name, status) VALUES (?, 'offline')").run(meta.checkpoint_name)
+            model = db.prepare('SELECT id FROM models WHERE name = ?').get(meta.checkpoint_name)
+          }
           if (model) checkpointId = model.id
         }
 
@@ -88,7 +92,11 @@ function registerInboxHandlers() {
 
         if (meta.loras && meta.loras.length > 0) {
           for (const l of meta.loras) {
-            const loraRow = db.prepare('SELECT id FROM loras WHERE name = ?').get(l.name)
+            let loraRow = db.prepare('SELECT id FROM loras WHERE name = ?').get(l.name)
+            if (!loraRow) {
+              db.prepare("INSERT OR IGNORE INTO loras (name, status) VALUES (?, 'offline')").run(l.name)
+              loraRow = db.prepare('SELECT id FROM loras WHERE name = ?').get(l.name)
+            }
             if (loraRow) {
               db.prepare(
                 'INSERT OR IGNORE INTO iteration_loras (iteration_id, lora_id, weight) VALUES (?, ?, ?)'
@@ -100,7 +108,7 @@ function registerInboxHandlers() {
         nextNumber++
       }
 
-      db.prepare('UPDATE main_gens SET updated_at = datetime("now") WHERE id = ?').run(targetId)
+      db.prepare("UPDATE main_gens SET updated_at = datetime('now') WHERE id = ?").run(targetId)
 
       const placeholders = itemIds.map(() => '?').join(',')
       db.prepare(`DELETE FROM inbox_items WHERE id IN (${placeholders})`).run(...itemIds)
