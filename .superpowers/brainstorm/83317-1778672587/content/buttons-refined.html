@@ -1,0 +1,128 @@
+<style>
+  .forge-bg { background: #0f0e0b; color: #eae5dc; font-family: 'Figtree', system-ui, sans-serif; }
+  .forge-surface { background: #1a1813; border: 1px solid #302c1e; border-radius: 8px; }
+  .forge-yellow { color: #e8c820; }
+  .forge-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: #8a8268; font-weight: 600; }
+  .forge-tag { display: inline-block; padding: 3px 7px; font-size: 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; margin: 2px; }
+  .tag-pos { background: rgba(125, 170, 136, 0.18); color: #7daa88; }
+  .tag-neg { background: rgba(224, 108, 117, 0.18); color: #e06c75; }
+  .tag-quality { background: rgba(198, 120, 221, 0.18); color: #c678dd; }
+  .tag-subject { background: rgba(122, 160, 232, 0.18); color: #7aa0e8; }
+  .tag-style { background: rgba(232, 200, 32, 0.15); color: #e8c820; }
+  .tag-camera { background: rgba(86, 182, 194, 0.18); color: #56b6c2; }
+  .ai-output { background: #1a1813; border: 1px solid #302c1e; border-radius: 12px 12px 12px 4px; padding: 14px; max-width: 88%; }
+
+  /* === Button variants to compare === */
+  /* A — ghost icons (minimal, just icon + tooltip on hover) */
+  .btn-ghost { background: transparent; border: 0; color: #8a8268; padding: 4px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+  .btn-ghost:hover { background: rgba(232,200,32,0.08); color: #e8c820; }
+  .btn-ghost svg { width: 13px; height: 13px; }
+
+  /* B — subtle pills (icon + text, soft fill) */
+  .btn-pill { background: rgba(232,200,32,0.06); border: 1px solid rgba(232,200,32,0.18); color: #e8c820; padding: 4px 10px; border-radius: 999px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; letter-spacing: 0.3px; transition: all .15s; }
+  .btn-pill:hover { background: rgba(232,200,32,0.12); border-color: rgba(232,200,32,0.4); }
+  .btn-pill svg { width: 11px; height: 11px; }
+  .btn-pill-secondary { background: transparent; border: 1px solid #302c1e; color: #8a8268; padding: 4px 10px; border-radius: 999px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; letter-spacing: 0.3px; transition: all .15s; }
+  .btn-pill-secondary:hover { color: #e8c820; border-color: #4a4530; }
+
+  /* C — yellow primary + ghost secondary (clear hierarchy) */
+  .btn-primary-soft { background: #e8c820; color: #0f0e0b; padding: 5px 12px; border: 0; border-radius: 6px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; transition: all .15s; }
+  .btn-primary-soft:hover { background: #f4d52a; }
+  .btn-primary-soft svg { width: 11px; height: 11px; }
+
+  .display-font { font-family: 'Bricolage Grotesque', serif; font-weight: 700; }
+</style>
+
+<h2>Pick the button treatment</h2>
+<p class="subtitle">Same AI-output card, three button styles. Hover them on the page to feel the interaction.</p>
+
+<div class="cards" style="grid-template-columns: 1fr; gap: 16px; max-width: 720px;">
+
+  <!-- A — Ghost icons -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image forge-bg" style="padding: 16px;">
+      <div class="ai-output" style="border-color: rgba(232,200,32,0.4); box-shadow: 0 0 0 1px rgba(232,200,32,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label forge-yellow">+ Positive · latest</span>
+          <div style="display: flex; gap: 2px;">
+            <button class="btn-ghost" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+            <button class="btn-ghost" title="Save preset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>Save</button>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; margin-bottom: 12px;">
+          <span class="forge-tag tag-quality">score_9</span><span class="forge-tag tag-quality">masterpiece</span><span class="forge-tag tag-subject">1girl</span><span class="forge-tag tag-subject">red_hair</span><span class="forge-tag tag-subject">green_eyes</span><span class="forge-tag tag-style">rooftop</span><span class="forge-tag tag-style">sunset</span><span class="forge-tag tag-camera">bokeh</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label" style="color: #e06c75;">− Negative</span>
+          <button class="btn-ghost" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7;">
+          <span class="forge-tag tag-neg">low_quality</span><span class="forge-tag tag-neg">bad_anatomy</span><span class="forge-tag tag-neg">blurry</span><span class="forge-tag tag-neg">watermark</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Ghost icons</h3>
+      <p>Minimal. Just icon + label, no border. Feels invisible until you hover, where it lights up amber. Closest to Linear / Notion.</p>
+    </div>
+  </div>
+
+  <!-- B — Soft pills -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image forge-bg" style="padding: 16px;">
+      <div class="ai-output" style="border-color: rgba(232,200,32,0.4); box-shadow: 0 0 0 1px rgba(232,200,32,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label forge-yellow">+ Positive · latest</span>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+            <button class="btn-pill-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>Save</button>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; margin-bottom: 12px;">
+          <span class="forge-tag tag-quality">score_9</span><span class="forge-tag tag-quality">masterpiece</span><span class="forge-tag tag-subject">1girl</span><span class="forge-tag tag-subject">red_hair</span><span class="forge-tag tag-subject">green_eyes</span><span class="forge-tag tag-style">rooftop</span><span class="forge-tag tag-style">sunset</span><span class="forge-tag tag-camera">bokeh</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label" style="color: #e06c75;">− Negative</span>
+          <button class="btn-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7;">
+          <span class="forge-tag tag-neg">low_quality</span><span class="forge-tag tag-neg">bad_anatomy</span><span class="forge-tag tag-neg">blurry</span><span class="forge-tag tag-neg">watermark</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Soft pills (recommended)</h3>
+      <p>Rounded amber-tinted pills. Copy is the primary action (filled tint), Save is a quieter outlined pill. Feels intentional without being loud.</p>
+    </div>
+  </div>
+
+  <!-- C — Primary + ghost -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image forge-bg" style="padding: 16px;">
+      <div class="ai-output" style="border-color: rgba(232,200,32,0.4); box-shadow: 0 0 0 1px rgba(232,200,32,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label forge-yellow">+ Positive · latest</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="btn-primary-soft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+            <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>Save</button>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; margin-bottom: 12px;">
+          <span class="forge-tag tag-quality">score_9</span><span class="forge-tag tag-quality">masterpiece</span><span class="forge-tag tag-subject">1girl</span><span class="forge-tag tag-subject">red_hair</span><span class="forge-tag tag-subject">green_eyes</span><span class="forge-tag tag-style">rooftop</span><span class="forge-tag tag-style">sunset</span><span class="forge-tag tag-camera">bokeh</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label" style="color: #e06c75;">− Negative</span>
+          <button class="btn-primary-soft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7;">
+          <span class="forge-tag tag-neg">low_quality</span><span class="forge-tag tag-neg">bad_anatomy</span><span class="forge-tag tag-neg">blurry</span><span class="forge-tag tag-neg">watermark</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Bold primary + ghost</h3>
+      <p>Copy gets a solid yellow button (clear primary). Save is a ghost icon. Strong hierarchy, but heavier and more brand-shout.</p>
+    </div>
+  </div>
+
+</div>

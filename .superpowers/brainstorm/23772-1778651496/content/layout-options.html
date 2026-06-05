@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>LoRA detail layout</title>
+<style>
+  :root {
+    --bg: #0f0e0b;
+    --surface: #1a1813;
+    --elevated: #242118;
+    --border: #302c1e;
+    --muted: #635c48;
+    --text: #bfb8a8;
+    --contrast: #eae5dc;
+    --yellow: #e8c820;
+    --blue: #7aa0e8;
+    --sage: #7daa88;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px;
+    background: var(--bg); color: var(--text);
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 13px; line-height: 1.5;
+  }
+  h1 { font-family: 'Bricolage Grotesque', sans-serif; color: var(--contrast); font-size: 22px; margin: 0 0 6px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 13px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .col-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    color: var(--yellow);
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .col-letter {
+    background: var(--yellow); color: var(--bg);
+    width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .col-desc { font-size: 11px; color: var(--muted); margin-bottom: 14px; min-height: 32px; }
+
+  .page {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .page > * + * { margin-top: 12px; }
+
+  /* Mock blocks */
+  .stats {
+    background: var(--surface); border-radius: 8px; padding: 12px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    font-size: 10px;
+  }
+  .stat { text-align: center; }
+  .stat-num { color: var(--sage); font-size: 16px; font-weight: 700; font-family: 'Bricolage Grotesque', sans-serif; }
+  .stat-label { color: var(--muted); font-size: 8px; text-transform: uppercase; }
+
+  .label-row {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 4px;
+  }
+
+  .examples-hero {
+    background: var(--surface); border-radius: 8px; padding: 8px;
+  }
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .ex {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #3a3528, #5a4f30);
+    border-radius: 4px;
+  }
+  .ex.a { background: linear-gradient(135deg, #3a3528, #c8a838); }
+  .ex.b { background: linear-gradient(135deg, #2a3548, #7aa0e8); }
+  .ex.c { background: linear-gradient(135deg, #2a3825, #7daa88); }
+  .ex.d { background: linear-gradient(135deg, #4a3528, #e87068); }
+  .ex.add {
+    background: var(--elevated);
+    border: 1px dashed var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 14px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 8px;
+  }
+  .field-box {
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .field-text { color: var(--contrast); }
+  .field-small { color: var(--yellow); font-weight: 700; }
+
+  .notes-box {
+    background: var(--surface); border-radius: 6px;
+    padding: 10px; min-height: 50px;
+    font-size: 11px; color: var(--text);
+  }
+
+  .usage {
+    background: var(--surface); border-radius: 6px; padding: 8px;
+  }
+  .usage-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+  }
+  .usage-thumb {
+    aspect-ratio: 0.85;
+    background: var(--elevated); border-radius: 3px;
+  }
+
+  /* Split layout B specifics */
+  .split-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 10px;
+  }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  .examples-tall {
+    background: var(--surface); border-radius: 8px; padding: 8px;
+  }
+  .examples-tall .examples-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .selected { border-color: var(--yellow) !important; }
+  .page:hover { cursor: pointer; border-color: var(--muted); }
+  .page.selected { border-color: var(--yellow); box-shadow: 0 0 0 2px var(--yellow); }
+</style>
+</head>
+<body>
+  <h1>LoRA detail — overall layout</h1>
+  <p class="subtitle">Where do the new fields sit relative to existing stats + notes + usage gallery? Checkpoint page mirrors the same structure (Rec CFG + Rec Steps instead of Trigger words + Strength).</p>
+
+  <div class="split">
+    <!-- LAYOUT A -->
+    <div>
+      <div class="col-label"><span class="col-letter">A</span> Stack — examples as hero band</div>
+      <div class="col-desc">Examples take a full-width band right under the stats. Then trigger words (wide) + strength (narrow) in one row. Notes below. Usage at bottom.</div>
+      <div class="page" onclick="document.querySelectorAll('.page').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
+        <div class="stats">
+          <div class="stat"><div class="stat-num">42</div><div class="stat-label">Iterations</div></div>
+          <div class="stat"><div class="stat-num">0.8</div><div class="stat-label">Default wt</div></div>
+          <div class="stat"><div class="stat-num">0.74</div><div class="stat-label">Avg wt</div></div>
+          <div class="stat"><div class="stat-num">7</div><div class="stat-label">Main Gens</div></div>
+        </div>
+
+        <div>
+          <div class="label-row">Examples</div>
+          <div class="examples-hero">
+            <div class="examples-grid">
+              <div class="ex a"></div>
+              <div class="ex b"></div>
+              <div class="ex c"></div>
+              <div class="ex d"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div>
+            <div class="label-row">Trigger words · 📋 Paste</div>
+            <div class="field-box field-text">1girl, masterpiece, &lt;lora:my-lora:1.0&gt;</div>
+          </div>
+          <div>
+            <div class="label-row">Strength · 📋</div>
+            <div class="field-box field-small">0.85</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">Notes</div>
+          <div class="notes-box">Best at 0.7–0.9. Pairs well with realisticVision base.</div>
+        </div>
+
+        <div>
+          <div class="label-row">Used in — 42 iterations</div>
+          <div class="usage">
+            <div class="usage-grid">
+              <div class="usage-thumb"></div><div class="usage-thumb"></div><div class="usage-thumb"></div>
+              <div class="usage-thumb"></div><div class="usage-thumb"></div><div class="usage-thumb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAYOUT B -->
+    <div>
+      <div class="col-label"><span class="col-letter">B</span> Two-column — examples taller, fields beside</div>
+      <div class="col-desc">Examples on the left at 60%, taller 2-col grid. Trigger words + strength + notes stack on the right. Usage at bottom.</div>
+      <div class="page" onclick="document.querySelectorAll('.page').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
+        <div class="stats">
+          <div class="stat"><div class="stat-num">42</div><div class="stat-label">Iterations</div></div>
+          <div class="stat"><div class="stat-num">0.8</div><div class="stat-label">Default wt</div></div>
+          <div class="stat"><div class="stat-num">0.74</div><div class="stat-label">Avg wt</div></div>
+          <div class="stat"><div class="stat-num">7</div><div class="stat-label">Main Gens</div></div>
+        </div>
+
+        <div class="split-row">
+          <div>
+            <div class="label-row">Examples</div>
+            <div class="examples-tall">
+              <div class="examples-grid">
+                <div class="ex a"></div>
+                <div class="ex b"></div>
+                <div class="ex c"></div>
+                <div class="ex d"></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack">
+            <div>
+              <div class="label-row">Trigger words · 📋</div>
+              <div class="field-box field-text" style="min-height: 40px;">1girl, masterpiece, &lt;lora:my-lora:1.0&gt;</div>
+            </div>
+            <div>
+              <div class="label-row">Strength · 📋</div>
+              <div class="field-box field-small">0.85</div>
+            </div>
+            <div>
+              <div class="label-row">Notes</div>
+              <div class="notes-box" style="min-height: 70px;">Best at 0.7–0.9.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label-row">Used in — 42 iterations</div>
+          <div class="usage">
+            <div class="usage-grid">
+              <div class="usage-thumb"></div><div class="usage-thumb"></div><div class="usage-thumb"></div>
+              <div class="usage-thumb"></div><div class="usage-thumb"></div><div class="usage-thumb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="subtitle" style="margin-top: 24px; max-width: 760px;">
+    My lean: <strong style="color: var(--yellow)">A (hero band)</strong>. You said "image field takes a nice larger portion" — a full-width band gives examples max horizontal breathing room, makes them feel like the focal point on a wide screen, and the text fields below get full width when you're filling them in (less cramped textareas). B compresses both halves and is fiddlier on narrow windows.
+  </p>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Trigger words shape</title>
+<style>
+  :root {
+    --bg: #0f0e0b;
+    --surface: #1a1813;
+    --elevated: #242118;
+    --border: #302c1e;
+    --muted: #635c48;
+    --text: #bfb8a8;
+    --contrast: #eae5dc;
+    --yellow: #e8c820;
+    --sage: #7daa88;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  h1 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; color: var(--contrast); font-size: 22px; margin: 0 0 6px; }
+  .subtitle { color: var(--muted); margin-bottom: 28px; font-size: 13px; }
+  .options { display: grid; gap: 16px; max-width: 720px; }
+  .option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color 150ms, transform 150ms;
+  }
+  .option:hover { border-color: var(--muted); }
+  .option.selected { border-color: var(--yellow); }
+  .option-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .letter {
+    background: var(--elevated); color: var(--yellow);
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--yellow); color: var(--bg); }
+  h3 { font-family: 'Bricolage Grotesque', sans-serif; color: var(--contrast); font-size: 15px; margin: 0; }
+  .desc { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  /* Mock field */
+  .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .paste-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .paste-btn:hover { color: var(--yellow); border-color: var(--yellow); }
+  .field {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--contrast);
+    font-size: 13px;
+  }
+  .field-multiline { min-height: 64px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: var(--elevated);
+    color: var(--contrast);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip .x { color: var(--muted); font-size: 10px; }
+  .chip-add { color: var(--muted); border-style: dashed; }
+  .copy-hint { font-size: 10px; color: var(--muted); margin-top: 8px; font-style: italic; }
+</style>
+</head>
+<body>
+  <h1>Trigger words — which shape feels right?</h1>
+  <p class="subtitle">LoRA detail page. You'll have a [Paste] button on all three. Question is about the shape of the field itself + how copy-back-out works.</p>
+
+  <div class="options">
+    <div class="option" data-choice="a" onclick="document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')">
+      <div class="option-header">
+        <div class="letter">A</div>
+        <div>
+          <h3>Single-line input</h3>
+          <div class="desc">One comma-separated string. Simplest. Whole value copies on click.</div>
+        </div>
+      </div>
+      <div class="label"><span>Trigger words</span><button class="paste-btn">📋 Paste</button></div>
+      <div class="field">1girl, masterpiece, &lt;lora:my-lora:1.0&gt;</div>
+      <div class="copy-hint">Click the field → copies whole string</div>
+    </div>
+
+    <div class="option" data-choice="b" onclick="document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')">
+      <div class="option-header">
+        <div class="letter">B</div>
+        <div>
+          <h3>Multi-line textarea</h3>
+          <div class="desc">Freeform. Good when a LoRA has paragraphs of guidance, sample prompts, etc.</div>
+        </div>
+      </div>
+      <div class="label"><span>Trigger words</span><button class="paste-btn">📋 Paste</button></div>
+      <div class="field field-multiline">1girl, masterpiece, &lt;lora:my-lora:1.0&gt;<br>negative: lowres, bad anatomy<br>recommended weight: 0.7–0.9</div>
+      <div class="copy-hint">Top-right copy icon → copies whole textarea</div>
+    </div>
+
+    <div class="option" data-choice="c" onclick="document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));this.classList.add('selected')">
+      <div class="option-header">
+        <div class="letter">C</div>
+        <div>
+          <h3>Chip list</h3>
+          <div class="desc">Each trigger word/phrase is a separate chip. Click a chip → that one phrase copies. [Paste] splits the clipboard on commas into multiple chips.</div>
+        </div>
+      </div>
+      <div class="label"><span>Trigger words</span><button class="paste-btn">📋 Paste</button></div>
+      <div class="field">
+        <div class="chips">
+          <span class="chip">1girl <span class="x">×</span></span>
+          <span class="chip">masterpiece <span class="x">×</span></span>
+          <span class="chip">&lt;lora:my-lora:1.0&gt; <span class="x">×</span></span>
+          <span class="chip chip-add">+ add</span>
+        </div>
+      </div>
+      <div class="copy-hint">Click any chip → copies just that phrase. Most flexible for re-use.</div>
+    </div>
+  </div>
+
+  <p class="subtitle" style="margin-top: 24px; max-width: 720px;">
+    My lean: <strong style="color: var(--yellow)">B (multi-line textarea)</strong> — matches the existing Notes field aesthetic, low-cost, and trigger-word formats vary a lot between LoRAs (sometimes one phrase, sometimes a paragraph with weight hints). Chips are nicer for copying individual phrases but add UI complexity for a feature you'll mostly read.
+  </p>
+</body>
+</html>

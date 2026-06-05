@@ -1,0 +1,237 @@
+<style>
+  .forge-bg { background: #0f0e0b; color: #eae5dc; font-family: 'Figtree', system-ui, sans-serif; }
+  .forge-surface { background: #1a1813; border: 1px solid #302c1e; border-radius: 8px; }
+  .forge-deep { background: #242118; border: 1px solid #302c1e; border-radius: 6px; }
+  .forge-yellow { color: #e8c820; }
+  .forge-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: #8a8268; font-weight: 600; }
+  .forge-tag { display: inline-block; padding: 3px 7px; font-size: 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; margin: 2px; cursor: pointer; }
+  .tag-pos { background: rgba(125, 170, 136, 0.18); color: #7daa88; }
+  .tag-neg { background: rgba(224, 108, 117, 0.18); color: #e06c75; }
+  .tag-quality { background: rgba(198, 120, 221, 0.18); color: #c678dd; }
+  .tag-subject { background: rgba(122, 160, 232, 0.18); color: #7aa0e8; }
+  .tag-style { background: rgba(232, 200, 32, 0.15); color: #e8c820; }
+  .tag-camera { background: rgba(86, 182, 194, 0.18); color: #56b6c2; }
+  .tag-lora { background: rgba(232, 80, 80, 0.18); color: #ff6b6b; font-weight: 600; border: 1px dashed rgba(232, 80, 80, 0.4); }
+  .display-font { font-family: 'Bricolage Grotesque', serif; font-weight: 700; }
+  .ai-output { background: #1a1813; border: 1px solid #302c1e; border-radius: 12px 12px 12px 4px; padding: 14px; max-width: 88%; }
+  .user-msg { background: #242118; border-radius: 12px 12px 4px 12px; padding: 10px 14px; max-width: 70%; align-self: flex-end; font-size: 13px; line-height: 1.5; color: #eae5dc; }
+  .btn-ghost { background: transparent; border: 0; color: #8a8268; padding: 4px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+  .btn-ghost:hover { background: rgba(232,200,32,0.08); color: #e8c820; }
+  .btn-ghost svg { width: 13px; height: 13px; }
+  .send-btn { background: #e8c820; color: #0f0e0b; font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 6px; border: 0; cursor: pointer; }
+  .icon-btn { background: transparent; border: 1px solid #302c1e; color: #8a8268; padding: 5px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+  .icon-btn:hover { color: #e8c820; }
+  .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 3px 8px; background: #242118; border-radius: 999px; color: #bfb8a8; }
+  .lora-row { padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background .12s; display: flex; align-items: center; gap: 8px; }
+  .lora-row:hover { background: #1a1813; }
+  .lora-row.selected { background: rgba(125, 170, 136, 0.12); border: 1px solid rgba(125, 170, 136, 0.3); }
+  .lora-checkbox { width: 14px; height: 14px; border: 1.5px solid #4a4530; border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .lora-checkbox.checked { background: #7daa88; border-color: #7daa88; }
+  .lora-checkbox.checked::after { content: '✓'; color: #0f0e0b; font-size: 10px; font-weight: 700; }
+  .lora-meta { font-size: 9px; color: #635c48; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .selected-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px 3px 9px; background: rgba(125, 170, 136, 0.18); color: #7daa88; border-radius: 999px; font-size: 10px; font-weight: 600; }
+  .selected-pill .x { cursor: pointer; opacity: 0.6; font-size: 13px; line-height: 1; }
+  .selected-pill .x:hover { opacity: 1; }
+  .addendum { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #302c1e; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .addendum-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: #635c48; font-weight: 600; }
+  .addendum-lora { font-size: 10px; color: #8a8268; font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; gap: 4px; }
+  .addendum-lora::before { content: '🎛'; font-size: 11px; }
+</style>
+
+<h2>Layout with LoRA panel + red trigger tags + addendum</h2>
+<p class="subtitle">Right panel shows your LoRAs. Selected ones become sage-green pills above the input. AI weaves trigger words into the prompt as red tags. Bottom of each response shows which LoRAs were applied.</p>
+
+<div class="forge-bg" style="width: 100%; height: 660px; display: flex; border-radius: 10px; overflow: hidden; border: 1px solid #302c1e;">
+
+  <!-- LEFT: Tag library -->
+  <div style="width: 220px; background: #0f0e0b; border-right: 1px solid #302c1e; padding: 14px; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <div class="display-font" style="font-size: 13px;">Tag Library</div>
+    </div>
+    <input style="width: 100%; background: #1a1813; border: 1px solid #302c1e; color: #bfb8a8; padding: 6px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 12px;" placeholder="Search 152k tags…" />
+
+    <div class="forge-label" style="margin-bottom: 4px;">Subject</div>
+    <div style="margin-bottom: 10px;">
+      <span class="forge-tag tag-subject">1girl</span><span class="forge-tag tag-subject">solo</span><span class="forge-tag tag-subject">portrait</span>
+    </div>
+
+    <div class="forge-label" style="margin-bottom: 4px;">Style</div>
+    <div style="margin-bottom: 10px;">
+      <span class="forge-tag tag-style">cinematic</span><span class="forge-tag tag-style">moody</span><span class="forge-tag tag-style">golden hour</span>
+    </div>
+
+    <div class="forge-label" style="margin-bottom: 4px;">Camera</div>
+    <div style="margin-bottom: 10px;">
+      <span class="forge-tag tag-camera">bokeh</span><span class="forge-tag tag-camera">close-up</span>
+    </div>
+  </div>
+
+  <!-- CENTER: Chat -->
+  <div style="flex: 1; display: flex; flex-direction: column; background: #0f0e0b;">
+
+    <!-- Top bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid #302c1e;">
+      <div>
+        <div class="display-font" style="font-size: 16px;">Prompt Builder</div>
+        <div style="font-size: 10px; color: #635c48;">DeepSeek V4-Flash · Illustrious / NoobAI · Obsession (illustrious XL) v predv.2</div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="icon-btn">↺ New</button>
+        <button class="icon-btn">⎘ Saved</button>
+      </div>
+    </div>
+
+    <!-- Transcript -->
+    <div style="flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;">
+
+      <div class="user-msg">A moody redhead portrait at sunset on a rooftop. Soft cinematic feel, slight smile.</div>
+
+      <div class="ai-output" style="border-color: rgba(232,200,32,0.4); box-shadow: 0 0 0 1px rgba(232,200,32,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label forge-yellow">+ Positive</span>
+          <div style="display: flex; gap: 2px;">
+            <button class="btn-ghost" title="Copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+            <button class="btn-ghost" title="Save preset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>Save</button>
+          </div>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; margin-bottom: 12px;">
+          <span class="forge-tag tag-lora">cinematicMood_v2</span><span class="forge-tag tag-subject">1girl</span><span class="forge-tag tag-subject">solo</span><span class="forge-tag tag-subject">portrait</span><span class="forge-tag tag-subject">red hair</span><span class="forge-tag tag-subject">green eyes</span><span class="forge-tag tag-subject">freckles</span><span class="forge-tag tag-subject">soft smile</span><span class="forge-tag tag-lora">moodyPortrait</span><span class="forge-tag tag-style">rooftop</span><span class="forge-tag tag-style">sunset</span><span class="forge-tag tag-style">golden hour</span><span class="forge-tag tag-style">cinematic</span><span class="forge-tag tag-style">soft lighting</span><span class="forge-tag tag-camera">depth of field</span><span class="forge-tag tag-camera">bokeh</span><span class="forge-tag tag-quality">masterpiece</span><span class="forge-tag tag-quality">best quality</span><span class="forge-tag tag-quality">newest</span><span class="forge-tag tag-quality">absurdres</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="forge-label" style="color: #e06c75;">− Negative</span>
+          <button class="btn-ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy</button>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7;">
+          <span class="forge-tag tag-neg">worst quality</span><span class="forge-tag tag-neg">old</span><span class="forge-tag tag-neg">early</span><span class="forge-tag tag-neg">low quality</span><span class="forge-tag tag-neg">lowres</span><span class="forge-tag tag-neg">bad anatomy</span><span class="forge-tag tag-neg">bad hands</span><span class="forge-tag tag-neg">signature</span><span class="forge-tag tag-neg">watermark</span>
+        </div>
+
+        <!-- Addendum -->
+        <div class="addendum">
+          <span class="addendum-label">LoRAs applied:</span>
+          <span class="addendum-lora">cinematic-mood-style-v2.safetensors</span>
+          <span class="addendum-lora">moody-portrait-trigger-pack.safetensors</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input dock -->
+    <div style="padding: 14px 18px 18px; border-top: 1px solid #302c1e; background: #0d0c09;">
+
+      <!-- Selected LoRA pills (above textarea) -->
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+        <span class="selected-pill">🎛 cinematic-mood-style-v2 <span class="x">×</span></span>
+        <span class="selected-pill">🎛 moody-portrait-trigger-pack <span class="x">×</span></span>
+      </div>
+
+      <div class="forge-surface" style="padding: 10px 12px;">
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+          <div style="flex: 1;">
+            <textarea style="width: 100%; background: transparent; border: 0; color: #eae5dc; font-size: 13px; resize: none; outline: none; line-height: 1.5; min-height: 38px;" placeholder="Describe your image in any way…"></textarea>
+          </div>
+          <button class="send-btn">Send ▸</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #302c1e;">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span class="pill">⬡ V4-Flash</span>
+            <span class="pill">Illustrious</span>
+          </div>
+          <div style="display: flex; gap: 14px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="forge-label">Temp</span>
+              <div style="background: #302c1e; height: 3px; border-radius: 2px; width: 90px; position: relative;">
+                <div style="background: #e8c820; height: 3px; border-radius: 2px; width: 40%;"></div>
+                <div style="position: absolute; left: 40%; top: -3px; width: 9px; height: 9px; background: #e8c820; border-radius: 50%; transform: translateX(-50%);"></div>
+              </div>
+              <span style="font-size: 10px; color: #e8c820; font-family: 'JetBrains Mono', monospace;">0.8</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: LoRA Picker -->
+  <div style="width: 270px; background: #0f0e0b; border-left: 1px solid #302c1e; padding: 14px; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <div class="display-font" style="font-size: 13px;">LoRAs</div>
+      <span style="font-size: 10px; color: #7daa88; font-weight: 600;">2 selected</span>
+    </div>
+    <input style="width: 100%; background: #1a1813; border: 1px solid #302c1e; color: #bfb8a8; padding: 6px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 10px;" placeholder="Search your LoRAs…" />
+
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+
+      <div class="lora-row selected">
+        <div class="lora-checkbox checked"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #eae5dc; font-weight: 500;">Cinematic Mood Style v2</div>
+          <div class="lora-meta">trigger: cinematicMood_v2</div>
+        </div>
+      </div>
+
+      <div class="lora-row selected">
+        <div class="lora-checkbox checked"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #eae5dc; font-weight: 500;">Moody Portrait Pack</div>
+          <div class="lora-meta">trigger: moodyPortrait</div>
+        </div>
+      </div>
+
+      <div class="lora-row">
+        <div class="lora-checkbox"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #bfb8a8; font-weight: 500;">Anime Detail Enhancer</div>
+          <div class="lora-meta">trigger: animeDetail, sharpAnime</div>
+        </div>
+      </div>
+
+      <div class="lora-row">
+        <div class="lora-checkbox"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #bfb8a8; font-weight: 500;">Golden Hour Lighting</div>
+          <div class="lora-meta">trigger: goldenHourFX</div>
+        </div>
+      </div>
+
+      <div class="lora-row">
+        <div class="lora-checkbox"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #bfb8a8; font-weight: 500;">Skin Texture v3</div>
+          <div class="lora-meta">trigger: skinTex_v3</div>
+        </div>
+      </div>
+
+      <div class="lora-row">
+        <div class="lora-checkbox"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #bfb8a8; font-weight: 500;">Character: Asuna v4</div>
+          <div class="lora-meta">trigger: asunaV4, asuna_yuuki</div>
+        </div>
+      </div>
+
+      <div class="lora-row" style="opacity: 0.45;">
+        <div class="lora-checkbox"></div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; color: #635c48; font-weight: 500;">Background Blur (offline)</div>
+          <div class="lora-meta">no trigger words set</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top: 20px;">
+  <p class="subtitle" style="font-size: 13px;">
+    A few things baked into this mockup — call out anything you'd change:
+  </p>
+  <ul style="font-size: 13px; color: #bfb8a8; padding-left: 20px; line-height: 1.7;">
+    <li><strong>Right panel</strong> lists all your LoRAs from the existing <code>loras</code> table. Searchable. Each row shows the LoRA name + trigger words. Click row or checkbox to toggle selection. Selected count shown top-right.</li>
+    <li><strong>Sage-green selected pills</strong> appear above the textarea — visual confirmation of what's attached. Click × to deselect.</li>
+    <li><strong>Red dashed tags</strong> in the output = LoRA trigger words. The AI is told "these are not Danbooru tags, insert them where they make sense and label them as lora-trigger type in your JSON response."</li>
+    <li><strong>Addendum</strong> at the bottom is the <code>.safetensors</code> filename of each LoRA — non-copyable, informational only. Stays with the prompt when saved.</li>
+    <li><strong>LoRAs with no trigger words set</strong> appear dimmed but still selectable (some users use LoRAs purely for style without trigger words). We can disable them entirely instead if you'd prefer.</li>
+    <li><strong>Offline LoRAs</strong> (file missing) appear dimmed with a small badge.</li>
+  </ul>
+</div>
