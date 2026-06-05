@@ -1,0 +1,35 @@
+# Dependencies (installed per-platform in CI; native modules are not portable)
+node_modules/
+
+# Build output
+dist/
+dist-electron/
+out/
+
+# Logs
+*.log
+logs/
+
+# macOS / AppleDouble artifacts (created when copying across filesystems)
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local brainstorm server state (pid/log/stopped markers)
+.superpowers/**/state/
+
+# Local SQLite db artifacts if any land in-repo
+*.db
+*.db-wal
+*.db-shm
