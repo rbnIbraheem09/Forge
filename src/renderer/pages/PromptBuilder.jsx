@@ -6,6 +6,7 @@ import InputDock from '../components/prompt/InputDock.jsx'
 import LoRAPicker from '../components/prompt/LoRAPicker.jsx'
 import TagLibraryPanel from '../components/prompt/TagLibraryPanel.jsx'
 import SavedPresetsDrawer from '../components/prompt/SavedPresetsDrawer.jsx'
+import ManualPromptComposer from '../components/prompt/ManualPromptComposer.jsx'
 
 export default function PromptBuilder() {
   const [activeSessionId, setActiveSessionId] = useState(null)
@@ -19,6 +20,7 @@ export default function PromptBuilder() {
   const [libraryReady, setLibraryReady] = useState(true)
   const [apiKeySet, setApiKeySet] = useState(true)
   const [presetsOpen, setPresetsOpen] = useState(false)
+  const [mode, setMode] = useState('ai') // 'ai' | 'manual'
   const showToast = useToast()
   const insertTagRef = useRef(null)
 
@@ -48,6 +50,17 @@ export default function PromptBuilder() {
     window.forge.on('prompt:tool-call', handler)
     return () => window.forge.off('prompt:tool-call', handler)
   }, [])
+
+  useEffect(() => {
+    window.forge.settings.get('prompt_builder_mode').then((v) => {
+      if (v === 'manual' || v === 'ai') setMode(v)
+    }).catch(() => {})
+  }, [])
+
+  const changeMode = (m) => {
+    setMode(m)
+    window.forge.settings.set('prompt_builder_mode', m)
+  }
 
   const reloadSessions = useCallback(async () => {
     const list = await window.forge.prompt.sessions.list()
@@ -196,6 +209,21 @@ export default function PromptBuilder() {
           </p>
         </div>
         <div className="flex gap-2">
+          <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid #302c1e' }}>
+            {[['ai', '✨ AI'], ['manual', '✍️ Manual']].map(([m, label]) => (
+              <button
+                key={m}
+                onClick={() => changeMode(m)}
+                className="px-3 py-1.5 text-xs font-medium"
+                style={{
+                  background: mode === m ? '#e8c820' : '#242118',
+                  color: mode === m ? '#0f0e0b' : '#bfb8a8',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <button
             onClick={newChat}
             className="px-3 py-1.5 rounded-lg text-xs"
@@ -255,21 +283,31 @@ export default function PromptBuilder() {
             </div>
 
             <div className="flex flex-col flex-1 min-w-0" style={{ background: '#0f0e0b' }}>
-              <ChatTranscript
-                sessionId={activeSessionId}
-                inFlight={inFlight}
-                recentToolCall={recentToolCall}
-                refreshTick={transcriptTick}
-                onSavePreset={handleSavePreset}
-              />
-              <InputDock
-                selectedLoras={selectedLorasArray}
-                onRemoveLora={removeLora}
-                onSend={handleSend}
-                inFlight={inFlight}
-                defaultTemp={defaultTemp}
-                insertTagRef={insertTagRef}
-              />
+              {mode === 'ai' ? (
+                <>
+                  <ChatTranscript
+                    sessionId={activeSessionId}
+                    inFlight={inFlight}
+                    recentToolCall={recentToolCall}
+                    refreshTick={transcriptTick}
+                    onSavePreset={handleSavePreset}
+                  />
+                  <InputDock
+                    selectedLoras={selectedLorasArray}
+                    onRemoveLora={removeLora}
+                    onSend={handleSend}
+                    inFlight={inFlight}
+                    defaultTemp={defaultTemp}
+                    insertTagRef={insertTagRef}
+                  />
+                </>
+              ) : (
+                <ManualPromptComposer
+                  selectedLoras={selectedLorasArray}
+                  onRemoveLora={removeLora}
+                  insertTagRef={insertTagRef}
+                />
+              )}
             </div>
 
             <div className="flex-shrink-0" style={{ width: '270px', background: '#0f0e0b', borderLeft: '1px solid #302c1e' }}>
