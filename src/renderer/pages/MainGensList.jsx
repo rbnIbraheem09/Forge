@@ -5,6 +5,9 @@ import { useToast } from '../context/ToastContext.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import { fadeUp, stagger } from '../lib/motion.js'
 
+// Natural sort: "2" before "10", "1. Foo" before "10. Foo" (numeric-aware, case-insensitive).
+const COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+
 function MainGenCard({ mg, onDelete, onTogglePin }) {
   const navigate = useNavigate()
   const [hovered, setHovered] = useState(false)
@@ -96,11 +99,11 @@ export default function MainGensList() {
 
   const filtered = allGens.filter(mg => mg.title.toLowerCase().includes(search.toLowerCase()))
   const sortedFiltered = [...filtered].sort((a, b) => {
-    let av, bv
-    if (sortBy === 'title') { av = (a.title || '').toLowerCase(); bv = (b.title || '').toLowerCase() }
-    else if (sortBy === 'created_at') { av = a.created_at || ''; bv = b.created_at || '' }
-    else { av = a.updated_at || ''; bv = b.updated_at || '' }
-    const cmp = av < bv ? -1 : av > bv ? 1 : 0
+    let cmp
+    if (sortBy === 'title') cmp = COLLATOR.compare(a.title || '', b.title || '')
+    else if (sortBy === 'created_at') cmp = (a.created_at || '').localeCompare(b.created_at || '')
+    else cmp = (a.updated_at || '').localeCompare(b.updated_at || '')
+    if (cmp === 0) cmp = (a.id || 0) - (b.id || 0) // stable tiebreaker by insertion order
     return sortDir === 'asc' ? cmp : -cmp
   })
   const pinned = sortedFiltered.filter(mg => mg.pinned)

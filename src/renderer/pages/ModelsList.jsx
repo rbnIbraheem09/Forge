@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '../context/ToastContext.jsx'
 import { familyLabel } from '../lib/model-families.js'
 
+// Natural sort: "2" before "10", "1. Foo" before "10. Foo" (numeric-aware, case-insensitive).
+const COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+
 export default function ModelsList() {
   const [models, setModels] = useState([])
   const [search, setSearch] = useState('')
@@ -14,6 +17,7 @@ export default function ModelsList() {
   const [selected, setSelected] = useState(new Set())
   const [mergeDialog, setMergeDialog] = useState(null)
   const [keepId, setKeepId] = useState(null)
+  const [hideDotUnderscore, setHideDotUnderscore] = useState(true)
   const showToast = useToast()
   const navigate = useNavigate()
 
@@ -22,6 +26,18 @@ export default function ModelsList() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    window.forge.settings.get('hide_appledouble_files').then(value => {
+      setHideDotUnderscore(value !== '0')
+    })
+  }, [])
+
+  const toggleHideDotUnderscore = () => {
+    const next = !hideDotUnderscore
+    setHideDotUnderscore(next)
+    window.forge.settings.set('hide_appledouble_files', next ? '1' : '0')
+  }
 
   const scan = async () => {
     setScanning(true)
@@ -61,13 +77,16 @@ export default function ModelsList() {
     await load()
   }
 
-  const filtered = models.filter(m => m.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = models.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase()) &&
+    !(hideDotUnderscore && m.name.startsWith('._'))
+  )
   const sortedFiltered = [...filtered].sort((a, b) => {
-    let av, bv
-    if (sortBy === 'name') { av = (a.name || '').toLowerCase(); bv = (b.name || '').toLowerCase() }
-    else if (sortBy === 'created_at') { av = a.created_at || ''; bv = b.created_at || '' }
-    else { av = a.usage_count || 0; bv = b.usage_count || 0 }
-    const cmp = av < bv ? -1 : av > bv ? 1 : 0
+    let cmp
+    if (sortBy === 'name') cmp = COLLATOR.compare(a.name || '', b.name || '')
+    else if (sortBy === 'created_at') cmp = (a.created_at || '').localeCompare(b.created_at || '')
+    else cmp = (a.usage_count || 0) - (b.usage_count || 0)
+    if (cmp === 0) cmp = (a.id || 0) - (b.id || 0) // stable tiebreaker by insertion order
     return sortDir === 'asc' ? cmp : -cmp
   })
 
@@ -107,6 +126,18 @@ export default function ModelsList() {
             {sortDir === 'asc' ? '↑' : '↓'}
           </button>
         </div>
+        <button
+          onClick={toggleHideDotUnderscore}
+          className="px-3 py-1.5 rounded-lg text-sm transition-colors"
+          title="Hide macOS AppleDouble sidecar files (._*) created on exFAT/FAT drives"
+          style={{
+            background: hideDotUnderscore ? '#302c1e' : '#242118',
+            color: hideDotUnderscore ? '#e8c820' : '#bfb8a8',
+            border: hideDotUnderscore ? '1px solid #e8c82040' : '1px solid transparent',
+          }}
+        >
+          Hide ._ files
+        </button>
         <button
           onClick={toggleMergeMode}
           className="px-3 py-1.5 rounded-lg text-sm transition-colors"

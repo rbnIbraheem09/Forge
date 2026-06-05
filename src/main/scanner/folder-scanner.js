@@ -13,6 +13,17 @@ function scanLorasFolder(folderPath) {
   return scanFolder(folderPath, 'loras')
 }
 
+function collectFiles(dir, results = []) {
+  let entries
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }) } catch { return results }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) collectFiles(full, results)
+    else results.push(full)
+  }
+  return results
+}
+
 function scanFolder(folderPath, table) {
   const db = getDatabase()
   if (!folderPath || !fs.existsSync(folderPath)) {
@@ -20,23 +31,19 @@ function scanFolder(folderPath, table) {
     return { added: 0, updated: 0, offlined: 0 }
   }
 
-  let files
-  try {
-    files = fs.readdirSync(folderPath)
-  } catch {
-    return { added: 0, updated: 0, offlined: 0 }
-  }
+  const files = collectFiles(folderPath)
 
   const foundNames = new Set()
   let added = 0
   let updated = 0
 
-  for (const file of files) {
-    const ext = path.extname(file).toLowerCase()
+  for (const filePath of files) {
+    if (path.basename(filePath).startsWith('._')) continue
+
+    const ext = path.extname(filePath).toLowerCase()
     if (!MODEL_EXTENSIONS.includes(ext)) continue
 
-    const name = path.basename(file, ext)
-    const filePath = path.join(folderPath, file)
+    const name = path.basename(filePath, ext)
     foundNames.add(name)
 
     const existing = db.prepare(`SELECT id FROM ${table} WHERE name = ?`).get(name)
