@@ -108,6 +108,14 @@ function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
     navigate(`/main-gens/${mainGenId || iter.main_gen_id}`)
   }
 
+  const setAsCover = async () => {
+    const mgId = mainGenId || iter?.main_gen_id
+    if (!mgId) return
+    await window.forge.mainGens.setHero(mgId, iterationId)
+    showToast('Set as Main Gen cover.')
+    onChange?.()
+  }
+
   if (!iter) return (
     <div className="flex-shrink-0 h-full flex items-center justify-center" style={{ width: 280, color: '#635c48', fontSize: 12 }}>
       Loading…
@@ -307,6 +315,16 @@ function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
         {(mainGenId || iter.main_gen_id) && (
           <>
             <div style={{ borderTop: '1px solid #302c1e' }} />
+            <button
+              onClick={setAsCover}
+              className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
+              style={{ background: '#242118', color: '#bfb8a8', border: '1px solid #302c1e' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#302c1e'; e.currentTarget.style.color = '#e8c820' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#242118'; e.currentTarget.style.color = '#bfb8a8' }}
+              title="Use this image as the cover shown on the Main Gens grid"
+            >
+              ★ Set as cover
+            </button>
             <button
               onClick={openMainGen}
               className="w-full rounded-lg py-2 text-xs font-medium transition-colors"
