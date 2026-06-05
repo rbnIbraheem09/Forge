@@ -36,3 +36,21 @@ export function colorsFor(tagItem, isNegativeBlock = false) {
   const group = CATEGORY_TO_COLOR[tagItem.category] || 'neutral'
   return COLORS[group]
 }
+
+// Danbooru numeric categories → display color group (manual builder pills).
+// 0 general · 1 artist · 3 copyright · 4 character · 5 meta.
+export const DANBOORU_CATEGORY_TO_COLOR = {
+  0: 'subject',   // general  → blue
+  1: 'style',     // artist   → yellow
+  3: 'quality',   // copyright→ purple
+  4: 'scene',     // character→ orange
+  5: 'neutral',   // meta     → grey
+}
+
+// Color for a manual tag pill. `category` is a Danbooru numeric code, or null/undefined
+// for a freeform (non-library) tag — which intentionally gets the neutral grey pill.
+export function colorsForDanbooru(category) {
+  if (category === null || category === undefined) return COLORS.neutral
+  const group = DANBOORU_CATEGORY_TO_COLOR[category] || 'neutral'
+  return COLORS[group]
+}
