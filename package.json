@@ -1,6 +1,7 @@
 {
   "name": "forge",
-  "version": "1.0.0",
+  "productName": "Forge",
+  "version": "1.0.1",
   "description": "ComfyUI Generation Manager",
   "main": "src/main/index.js",
   "scripts": {

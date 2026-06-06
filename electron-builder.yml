@@ -10,6 +10,7 @@ files:
   - node_modules/**
 mac:
   category: public.app-category.productivity
+  icon: build/icon.icns
   target:
     - dmg
     - zip
@@ -20,6 +21,7 @@ mac:
 dmg:
   title: Forge
 win:
+  icon: build/icon.ico
   target:
     - nsis
 nsis:
