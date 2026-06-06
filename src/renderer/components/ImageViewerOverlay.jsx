@@ -5,6 +5,22 @@ import { overlayBg, scaleIn } from '../lib/motion.js'
 import TagChips from './TagChips.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
+// Prompt/negative expand state is a renderer-only cosmetic preference. We
+// persist it in localStorage (not the settings table) so it reads synchronously
+// on mount — the sidebar remounts every time the viewer opens, and an async
+// settings round-trip would flash the toggles shut before resolving. localStorage
+// also makes the choice stick across app restarts.
+const VIEWER_PREF = {
+  prompt: 'forge:viewer:promptExpanded',
+  neg: 'forge:viewer:negExpanded',
+}
+const readPref = (key) => {
+  try { return localStorage.getItem(key) === '1' } catch { return false }
+}
+const writePref = (key, val) => {
+  try { localStorage.setItem(key, val ? '1' : '0') } catch { /* ignore */ }
+}
+
 function FieldRow({ label, value }) {
   return (
     <div className="flex justify-between items-start gap-2 text-xs">
@@ -19,8 +35,8 @@ function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
   const [globalFields, setGlobalFields] = useState([])
   const [customFields, setCustomFields] = useState([])
   const [notesDraft, setNotesDraft] = useState('')
-  const [promptExpanded, setPromptExpanded] = useState(false)
-  const [negExpanded, setNegExpanded] = useState(false)
+  const [promptExpanded, setPromptExpanded] = useState(() => readPref(VIEWER_PREF.prompt))
+  const [negExpanded, setNegExpanded] = useState(() => readPref(VIEWER_PREF.neg))
   const showToast = useToast()
   const navigate = useNavigate()
   const saveTimer = useRef(null)
@@ -211,7 +227,7 @@ function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
           <button
             className="text-[9px] uppercase tracking-wider mb-2 flex items-center gap-1"
             style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-            onClick={() => setPromptExpanded(p => !p)}
+            onClick={() => setPromptExpanded(p => { const n = !p; writePref(VIEWER_PREF.prompt, n); return n })}
           >
             Prompt {promptExpanded ? '▲' : '▼'}
           </button>
@@ -227,7 +243,7 @@ function IterationSidebar({ iterationId, mainGenId, onChange, onClose }) {
           <button
             className="text-[9px] uppercase tracking-wider mb-2 flex items-center gap-1"
             style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
-            onClick={() => setNegExpanded(p => !p)}
+            onClick={() => setNegExpanded(p => { const n = !p; writePref(VIEWER_PREF.neg, n); return n })}
           >
             Negative {negExpanded ? '▲' : '▼'}
           </button>

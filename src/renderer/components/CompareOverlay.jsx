@@ -26,6 +26,47 @@ function MetaRow({ label, aVal, bVal, rowIndex }) {
   )
 }
 
+// Prompts are long free text, so they don't fit the compact metadata grid.
+// Render them in their own side-by-side block (A | B) below the diff table,
+// keeping the yellow "differs" convention used by the metadata rows.
+function PromptCompareBlock({ label, aVal, bVal }) {
+  const a = (aVal || '').trim()
+  const b = (bVal || '').trim()
+  const differs = a !== b
+  const cellStyle = {
+    background: '#1a1813',
+    border: '1px solid #302c1e',
+    color: '#bfb8a8',
+    maxHeight: 180,
+    overflowY: 'auto',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+  }
+  return (
+    <div className="rounded-xl p-3" style={{ background: '#0f0e0b', border: '1px solid #302c1e' }}>
+      <div className="flex items-center justify-between mb-2">
+        <p
+          className="text-[10px] uppercase tracking-wider"
+          style={{ color: '#635c48', fontFamily: 'Bricolage Grotesque, sans-serif' }}
+        >
+          {label}
+        </p>
+        <span className="text-[10px]" style={{ color: differs ? '#e8c820' : '#635c48' }}>
+          {differs ? '≠ differs' : '= identical'}
+        </span>
+      </div>
+      <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div className="rounded-lg p-2.5 text-xs leading-relaxed" style={cellStyle}>
+          {a || <span style={{ color: '#635c48' }}>—</span>}
+        </div>
+        <div className="rounded-lg p-2.5 text-xs leading-relaxed" style={cellStyle}>
+          {b || <span style={{ color: '#635c48' }}>—</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CompareOverlay({ iterA, iterB, onClose }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -169,6 +210,12 @@ export default function CompareOverlay({ iterA, iterB, onClose }) {
           {allRows.map((row, i) => (
             <MetaRow key={row.label} label={row.label} aVal={row.aVal} bVal={row.bVal} rowIndex={i} />
           ))}
+        </div>
+
+        {/* Prompts — full side-by-side comparison */}
+        <div className="mt-6 flex flex-col gap-3">
+          <PromptCompareBlock label="Positive Prompt" aVal={iterA.prompt} bVal={iterB.prompt} />
+          <PromptCompareBlock label="Negative Prompt" aVal={iterA.negative_prompt} bVal={iterB.negative_prompt} />
         </div>
 
         <p className="text-[10px] mt-3 text-center" style={{ color: '#635c48' }}>
