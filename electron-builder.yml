@@ -1,5 +1,10 @@
 appId: com.forge.app
 productName: Forge
+# Ad-hoc signs the macOS bundle after packaging so it has a valid, self-
+# consistent code signature. Without this the unsigned bundle ships with a
+# broken seal that macOS reports as "damaged and can't be opened". See
+# build/after-pack.cjs for the full explanation.
+afterPack: build/after-pack.cjs
 directories:
   output: dist/package
   buildResources: build
@@ -15,8 +20,11 @@ mac:
     - dmg
     - zip
   darkModeSupport: true
-  # Unsigned: no Apple Developer cert wired up. On first launch users
+  # No Apple Developer cert wired up, so electron-builder's own signing pass is
+  # skipped (identity: null) and the bundle is instead ad-hoc signed by the
+  # afterPack hook above. The app is NOT notarized, so on first launch users
   # right-click > Open (or System Settings > Privacy & Security > Open Anyway).
+  # For a zero-prompt launch you need Developer ID signing + notarization.
   identity: null
 dmg:
   title: Forge
